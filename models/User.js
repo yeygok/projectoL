@@ -6,15 +6,18 @@ class User {
   static async create({ name, email, password, role = 'user' }) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const [result] = await connection.promise().query(
-      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
-      [name, email, hashedPassword, role]
+      'INSERT INTO usuario (nombre, email, contrasena, rol_id) VALUES (?, ?, ?, ?)',
+      [name, email, hashedPassword, role || 2] // 2 = rol por defecto (cliente)
     );
     return result.insertId;
   }
 
   static async findByEmail(email) {
     const [rows] = await connection.promise().query(
-      'SELECT * FROM users WHERE email = ?',
+      `SELECT u.*, r.nombre as rol_nombre 
+       FROM usuario u
+       JOIN rol r ON u.rol_id = r.id
+       WHERE u.email = ?`,
       [email]
     );
     return rows[0];

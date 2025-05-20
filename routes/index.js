@@ -1,38 +1,34 @@
 const express = require('express');
 const router = express.Router();
-const { auth, adminAuth } = require('../middlewares/auth');
-const { register, login } = require('../controllers/authController');
-const {
-  getAllServices,
-  getServiceById,
-  createService,
-  updateService,
-  deleteService
-} = require('../controllers/serviceController');
-const {
-  getAllProducts,
-  getProductById,
-  createProduct,
-  updateProduct,
-  deleteProduct
-} = require('../controllers/productController');
+const pool = require('../config/db');
 
-// Rutas de autenticación
-router.post('/register', register);
-router.post('/login', login);
+// Ruta temporal para prueba de conexión y consulta simple
+router.get('/test-users', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM usuario LIMIT 5');
+    res.json(rows);
+  } catch (error) {
+    console.error('Error en ruta test-users:', error.message);
+    res.status(500).json({ error: 'Error en prueba de usuarios' });
+  }
+});
 
-// Rutas de servicios
-router.get('/services', getAllServices);
-router.get('/services/:id', getServiceById);
-router.post('/services', auth, adminAuth, createService);
-router.put('/services/:id', auth, adminAuth, updateService);
-router.delete('/services/:id', auth, adminAuth, deleteService);
+const userRoutes = require('./user');
+const productRoutes = require('./product');
+const serviceRoutes = require('./service');
+const authRoutes = require('./auth');
+const perfilRoutes = require('./perfil');
+const clienteRoutes = require('./cliente');
+const direccionRoutes = require('./direccion');
+const agendamientoRoutes = require('./agendamiento');
 
-// Rutas de productos
-router.get('/products', getAllProducts);
-router.get('/products/:id', getProductById);
-router.post('/products', auth, adminAuth, createProduct);
-router.put('/products/:id', auth, adminAuth, updateProduct);
-router.delete('/products/:id', auth, adminAuth, deleteProduct);
+router.use('/users', userRoutes);
+router.use('/products', productRoutes);
+router.use('/services', serviceRoutes);
+router.use('/auth', authRoutes);
+router.use('/perfiles', perfilRoutes);
+router.use('/cliente', clienteRoutes);
+router.use('/direccion', direccionRoutes);
+router.use('/agendamiento', agendamientoRoutes);
 
 module.exports = router;
