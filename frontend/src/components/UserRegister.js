@@ -2,22 +2,21 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 const UserRegister = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [nombre, setNombre] = useState('');
+  const [correo, setCorreo] = useState('');
+  const [contrasena, setContrasena] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:3000/api/register', {
-        name,
-        email,
-        password,
+        correo,
+        contrasena,
       });
       console.log('Usuario registrado:', response.data);
     } catch (err) {
-      setError(err.response.data.error);
+      setError(err.response?.data?.error || 'Error en el registro');
     }
   };
 
@@ -25,9 +24,27 @@ const UserRegister = () => {
     <div>
       <h2>Registro de Usuario</h2>
       <form onSubmit={handleSubmit}>
-        <input type="text" placeholder="Nombre" value={name} onChange={(e) => setName(e.target.value)} required />
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        <input type="password" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <input 
+          type="text" 
+          placeholder="Nombre" 
+          value={nombre} 
+          onChange={(e) => setNombre(e.target.value)} 
+          required 
+        />
+        <input 
+          type="email" 
+          placeholder="Correo" 
+          value={correo} 
+          onChange={(e) => setCorreo(e.target.value)} 
+          required 
+        />
+        <input 
+          type="password" 
+          placeholder="Contraseña" 
+          value={contrasena} 
+          onChange={(e) => setContrasena(e.target.value)} 
+          required 
+        />
         <button type="submit">Registrar</button>
       </form>
       {error && <p>{error}</p>}

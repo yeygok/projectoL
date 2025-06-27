@@ -3,6 +3,7 @@ import UserRegister from './components/UserRegister';
 import UserLogin from './components/UserLogin';
 import ProductList from './components/ProductList';
 import ServiceList from './components/ServiceList';
+import CrudContainer from './components/CrudContainer';
 import './App.css';
 
 function App() {
@@ -61,8 +62,7 @@ function App() {
             <button onClick={handleLogout}>Cerrar sesión</button>
           </header>
           <div className="content-grid">
-            <ProductList />
-            <ServiceList />
+            <CrudContainer />
           </div>
         </div>
       )}
