@@ -26,6 +26,7 @@ app.use('/api/tipo_servicio', require('./routes/tipo_servicio'));
 app.use('/api/tipo_servicio_producto', require('./routes/tipo_servicio_producto'));
 app.use('/api/estado_orden', require('./routes/estado_orden'));
 app.use('/api/estado_usuario', require('./routes/estado_usuario'));
+app.use('/dashboard', require('./routes/dashboard'));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
