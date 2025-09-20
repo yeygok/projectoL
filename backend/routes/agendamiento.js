@@ -10,5 +10,7 @@ router.get('/:id', agendamientoController.getAgendamientoById);
 router.post('/', agendamientoController.createAgendamiento);
 router.put('/:id', agendamientoController.updateAgendamiento);
 router.delete('/:id', agendamientoController.deleteAgendamiento);
+router.get('/disponibilidad', agendamientoController.checkDisponibilidad);
+router.get('/:id/detalle', agendamientoController.getAgendamientoDetalle);
 
 module.exports = router;

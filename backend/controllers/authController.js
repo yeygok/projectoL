@@ -8,6 +8,11 @@ const register = async (req, res) => {
     return res.status(400).json({ error: 'Correo y contraseña son requeridos' });
   }
   try {
+    // Validar que el perfil_id exista en la tabla perfil
+    const [perfilRows] = await pool.query('SELECT id FROM perfil WHERE id = ?', [perfil_id]);
+    if (perfilRows.length === 0) {
+      return res.status(400).json({ error: 'El perfil_id no existe en la tabla perfil' });
+    }
     // Verificar si el usuario ya existe
     const [existingUser] = await pool.query('SELECT id FROM usuario WHERE correo = ?', [correo]);
     if (existingUser.length > 0) {
@@ -21,7 +26,12 @@ const register = async (req, res) => {
       'INSERT INTO usuario (correo, contrasena, perfil_id, estado_id) VALUES (?, ?, ?, ?)',
       [correo, hashedPassword, perfil_id, estado_id]
     );
-    return res.status(201).json({ id: result.insertId, correo });
+    const usuario_id = result.insertId;
+    // Si el perfil es cliente (ajusta el id según tu base de datos, por ejemplo 2)
+    if (perfil_id == 2) {
+      await pool.query('INSERT INTO cliente (usuario_id) VALUES (?)', [usuario_id]);
+    }
+    return res.status(201).json({ id: usuario_id, correo, perfil_id });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Error en el registro' });

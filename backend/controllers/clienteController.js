@@ -29,6 +29,16 @@ const createCliente = async (req, res) => {
     return res.status(400).json({ error: 'usuario_id es requerido' });
   }
   try {
+    // Validar que el usuario exista
+    const [usuarioRows] = await pool.query('SELECT id FROM usuario WHERE id = ?', [usuario_id]);
+    if (usuarioRows.length === 0) {
+      return res.status(400).json({ error: 'El usuario_id no existe en la tabla usuario' });
+    }
+    // Validar que el usuario no esté ya registrado como cliente
+    const [clienteRows] = await pool.query('SELECT id FROM cliente WHERE usuario_id = ?', [usuario_id]);
+    if (clienteRows.length > 0) {
+      return res.status(400).json({ error: 'El usuario_id ya está registrado como cliente' });
+    }
     const [result] = await pool.query('INSERT INTO cliente (usuario_id) VALUES (?)', [usuario_id]);
     res.status(201).json({ id: result.insertId });
   } catch (error) {

@@ -21,6 +21,11 @@ const createUser = async (req, res) => {
     return res.status(400).json({ error: 'Campos requeridos: correo, contrasena' });
   }
   try {
+    // Validar que el perfil_id exista en la tabla perfil
+    const [perfilRows] = await pool.query('SELECT id FROM perfil WHERE id = ?', [perfil_id]);
+    if (perfilRows.length === 0) {
+      return res.status(400).json({ error: 'El perfil_id no existe en la tabla perfil' });
+    }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(contrasena, salt);
     const [result] = await pool.query(

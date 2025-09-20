@@ -24,46 +24,54 @@ const getPerfilById = async (req, res) => {
 };
 
 const createPerfil = async (req, res) => {
-  const { nombre } = req.body;
-  if (!nombre) {
-    return res.status(400).json({ error: 'Campo requerido: nombre' });
+  const { documento, nombre, fecha_nacimiento, correo, telefono, tipo_documento_id } = req.body;
+  if (!documento || !nombre || !fecha_nacimiento || !correo || !telefono || !tipo_documento_id) {
+    return res.status(400).json({ error: 'Campos requeridos: documento, nombre, fecha_nacimiento, correo, telefono, tipo_documento_id' });
   }
   try {
-    const [result] = await pool.query('INSERT INTO perfil (nombre) VALUES (?)', [nombre]);
-    res.status(201).json({ id: result.insertId, nombre });
+    const [result] = await pool.query(
+      'INSERT INTO perfil (documento, nombre, fecha_nacimiento, correo, telefono, tipo_documento_id) VALUES (?, ?, ?, ?, ?, ?)',
+      [documento, nombre, fecha_nacimiento, correo, telefono, tipo_documento_id]
+    );
+    res.status(201).json({ id: result.insertId, documento, nombre, fecha_nacimiento, correo, telefono, tipo_documento_id });
   } catch (error) {
-    console.error('Error en createPerfil:', error.message);
-    res.status(500).json({ error: 'Error al crear perfil' });
+    console.error('Error en createPerfil:', error);
+    res.status(500).json({ error: error.sqlMessage || 'Error al crear perfil' });
   }
 };
 
 const updatePerfil = async (req, res) => {
-  const { nombre } = req.body;
-  if (!nombre) {
-    return res.status(400).json({ error: 'Campo requerido: nombre' });
+  const { id } = req.params;
+  const { documento, nombre, fecha_nacimiento, correo, telefono, tipo_documento_id } = req.body;
+  if (!documento || !nombre || !fecha_nacimiento || !correo || !telefono || !tipo_documento_id) {
+    return res.status(400).json({ error: 'Campos requeridos: documento, nombre, fecha_nacimiento, correo, telefono, tipo_documento_id' });
   }
   try {
-    const [result] = await pool.query('UPDATE perfil SET nombre = ? WHERE id = ?', [nombre, req.params.id]);
+    const [result] = await pool.query(
+      'UPDATE perfil SET documento = ?, nombre = ?, fecha_nacimiento = ?, correo = ?, telefono = ?, tipo_documento_id = ? WHERE id = ?',
+      [documento, nombre, fecha_nacimiento, correo, telefono, tipo_documento_id, id]
+    );
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Perfil no encontrado' });
     }
-    res.json({ id: req.params.id, nombre });
+    res.json({ id, documento, nombre, fecha_nacimiento, correo, telefono, tipo_documento_id });
   } catch (error) {
-    console.error('Error en updatePerfil:', error.message);
-    res.status(500).json({ error: 'Error al actualizar perfil' });
+    console.error('Error en updatePerfil:', error);
+    res.status(500).json({ error: error.sqlMessage || 'Error al actualizar perfil' });
   }
 };
 
 const deletePerfil = async (req, res) => {
+  const { id } = req.params;
   try {
-    const [result] = await pool.query('DELETE FROM perfil WHERE id = ?', [req.params.id]);
+    const [result] = await pool.query('DELETE FROM perfil WHERE id = ?', [id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Perfil no encontrado' });
     }
-    res.status(204).send();
+    res.json({ message: 'Perfil eliminado correctamente' });
   } catch (error) {
-    console.error('Error en deletePerfil:', error.message);
-    res.status(500).json({ error: 'Error al eliminar perfil' });
+    console.error('Error en deletePerfil:', error);
+    res.status(500).json({ error: error.sqlMessage || 'Error al eliminar perfil' });
   }
 };
 

@@ -1,0 +1,39 @@
+.crud-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
+}
+.crud-table th, .crud-table td {
+  border: 1px solid #e0e0e0;
+  padding: 0.5rem 1rem;
+  text-align: left;
+}
+.crud-table th {
+  background: #f7f7f7;
+}
+.crud-table tr:nth-child(even) {
+  background: #fafafa;
+}
+.crud-form {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.crud-form input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.crud-form button, .crud-table button {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  margin-left: 0.5rem;
+  transition: background 0.2s;
+}
+.crud-form button:hover, .crud-table button:hover {
+  background: #125ea2;
+}
