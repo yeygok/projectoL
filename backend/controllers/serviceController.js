@@ -1,7 +1,5 @@
 const pool = require('../config/db');
 
-const pool = require('../config/db');
-
 const getAllServices = async (req, res) => {
   try {
     const [rows] = await pool.query(`

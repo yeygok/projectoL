@@ -1,7 +1,5 @@
 const pool = require('../config/db');
 
-const pool = require('../config/db');
-
 const getAllRoles = async (req, res) => {
   try {
     const [rows] = await pool.query(`

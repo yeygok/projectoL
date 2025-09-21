@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const rolPermisoController = require('../controllers/rolPermisoController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const { authMiddleware } = require('../middlewares/authMiddleware');
 
 router.use(authMiddleware);
 

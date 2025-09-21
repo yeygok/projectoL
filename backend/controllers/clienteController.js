@@ -59,6 +59,53 @@ const getClienteConReservas = async (req, res) => {
   }
 };
 
+// Crear nuevo cliente
+const createCliente = async (req, res) => {
+  const { email, nombre, apellido, telefono, password } = req.body;
+  
+  if (!email || !nombre || !apellido || !password) {
+    return res.status(400).json({ 
+      error: 'Todos los campos son requeridos: email, nombre, apellido, password' 
+    });
+  }
+  
+  try {
+    // Verificar si el email ya existe
+    const [existingUser] = await pool.query('SELECT id FROM Usuarios WHERE email = ?', [email]);
+    if (existingUser.length > 0) {
+      return res.status(400).json({ error: 'El email ya está registrado' });
+    }
+
+    // Obtener el ID del rol Cliente
+    const [rolCliente] = await pool.query('SELECT id FROM Roles WHERE nombre = ?', ['cliente']);
+    if (rolCliente.length === 0) {
+      return res.status(500).json({ error: 'Rol cliente no encontrado en el sistema' });
+    }
+
+    const rolClienteId = rolCliente[0].id;
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Crear nuevo cliente
+    const [result] = await pool.query(
+      'INSERT INTO Usuarios (email, password, nombre, apellido, telefono, rol_id, activo) VALUES (?, ?, ?, ?, ?, ?, 1)',
+      [email, hashedPassword, nombre, apellido, telefono, rolClienteId]
+    );
+    
+    res.status(201).json({ 
+      message: 'Cliente creado exitosamente',
+      id: result.insertId,
+      email,
+      nombre,
+      apellido,
+      telefono
+    });
+  } catch (error) {
+    console.error('Error en createCliente:', error);
+    res.status(500).json({ error: 'Error al crear cliente' });
+  }
+};
+
 // Convertir usuario existente a cliente (cambiar su rol)
 const convertirACliente = async (req, res) => {
   const { usuario_id } = req.body;
@@ -220,6 +267,7 @@ const deleteCliente = async (req, res) => {
 module.exports = {
   getAllClientes,
   getClienteById,
+  createCliente,
   getClienteConReservas,
   convertirACliente,
   updateCliente,
