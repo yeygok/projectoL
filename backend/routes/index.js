@@ -5,7 +5,7 @@ const pool = require('../config/db');
 // Ruta temporal para prueba de conexión y consulta simple
 router.get('/test-users', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM usuario LIMIT 5');
+    const [rows] = await pool.query('SELECT * FROM Usuarios LIMIT 5');
     res.json(rows);
   } catch (error) {
     console.error('Error en ruta test-users:', error.message);
@@ -13,22 +13,28 @@ router.get('/test-users', async (req, res) => {
   }
 });
 
-const userRoutes = require('./user');
-const productRoutes = require('./product');
-const serviceRoutes = require('./service');
+// Importar solo rutas que existen
 const authRoutes = require('./auth');
+const serviceRoutes = require('./service');
 const perfilRoutes = require('./perfil');
 const clienteRoutes = require('./cliente');
-const direccionRoutes = require('./direccion');
 const agendamientoRoutes = require('./agendamiento');
+const dashboardRoutes = require('./dashboard');
+const rolRoutes = require('./rol');
+const permisoRoutes = require('./permiso');
+const rolPermisoRoutes = require('./rol_permiso');
+const tipoServicioRoutes = require('./tipo_servicio');
 
-router.use('/users', userRoutes);
-router.use('/products', productRoutes);
-router.use('/services', serviceRoutes);
+// Configurar rutas
 router.use('/auth', authRoutes);
+router.use('/services', serviceRoutes);
 router.use('/perfiles', perfilRoutes);
-router.use('/cliente', clienteRoutes);
-router.use('/direccion', direccionRoutes);
+router.use('/clientes', clienteRoutes);
 router.use('/agendamiento', agendamientoRoutes);
+router.use('/dashboard', dashboardRoutes);
+router.use('/roles', rolRoutes);
+router.use('/permisos', permisoRoutes);
+router.use('/rol-permisos', rolPermisoRoutes);
+router.use('/tipos-servicio', tipoServicioRoutes);
 
 module.exports = router;

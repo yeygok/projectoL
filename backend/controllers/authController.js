@@ -2,10 +2,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
 
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const pool = require('../config/db');
-
 const register = async (req, res) => {
   const { email, password, nombre, apellido, telefono, rol_id = 2 } = req.body; // 2 = cliente por defecto
   
