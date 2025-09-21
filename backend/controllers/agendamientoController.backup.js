@@ -14,7 +14,7 @@ const getAllAgendamientos = async (req, res) => {
         uc.telefono as cliente_telefono,
         ut.nombre as tecnico_nombre,
         ut.apellido as tecnico_apellido,
-        er.estado as estado_nombre,
+        er.nombre as estado_nombre,
         ts.nombre as tipo_servicio,
         ts.multiplicador_precio,
         v.modelo as vehiculo_modelo,
@@ -47,7 +47,7 @@ const getAgendamientoById = async (req, res) => {
         uc.telefono as cliente_telefono,
         ut.nombre as tecnico_nombre,
         ut.apellido as tecnico_apellido,
-        er.estado as estado_nombre,
+        er.nombre as estado_nombre,
         ts.nombre as tipo_servicio,
         ts.descripcion as tipo_servicio_descripcion,
         ts.multiplicador_precio,
@@ -118,7 +118,7 @@ const createAgendamiento = async (req, res) => {
     // Validar que el técnico exista si se especifica
     if (tecnico_id) {
       const [tecnicoRows] = await connection.query(
-        'SELECT id, nombre, apellido, email, telefono FROM Usuarios WHERE id = ? AND rol_id = (SELECT id FROM Roles WHERE nombre = "tecnico")', 
+        'SELECT id FROM Usuarios WHERE id = ? AND rol_id = (SELECT id FROM Roles WHERE nombre = "tecnico")', 
         [tecnico_id]
       );
       if (tecnicoRows.length === 0) {
@@ -133,15 +133,15 @@ const createAgendamiento = async (req, res) => {
     }
     
     // Validar que el tipo de servicio exista
-    const [tipoServicioRows] = await connection.query('SELECT id, nombre, multiplicador_precio, descripcion FROM TiposServicio WHERE id = ?', [servicio_tipo_id]);
+    const [tipoServicioRows] = await connection.query('SELECT id, nombre, multiplicador_precio FROM TiposServicio WHERE id = ?', [servicio_tipo_id]);
     if (tipoServicioRows.length === 0) {
       throw new Error(`Tipo de servicio con ID ${servicio_tipo_id} no encontrado`);
     }
     
     // Validar que la ubicación exista
-    const [ubicacionRows] = await connection.query('SELECT id, direccion, barrio, localidad, zona FROM Ubicaciones WHERE id = ? AND activa = 1', [ubicacion_servicio_id]);
+    const [ubicacionRows] = await connection.query('SELECT id FROM Ubicaciones WHERE id = ?', [ubicacion_servicio_id]);
     if (ubicacionRows.length === 0) {
-      throw new Error(`Ubicación con ID ${ubicacion_servicio_id} no encontrada o inactiva`);
+      throw new Error(`Ubicación con ID ${ubicacion_servicio_id} no encontrada`);
     }
     
     // Validar que el vehículo exista si se especifica
@@ -155,7 +155,7 @@ const createAgendamiento = async (req, res) => {
     // Verificar disponibilidad del técnico en la fecha/hora (si se especifica técnico)
     if (tecnico_id) {
       const [reservasConflicto] = await connection.query(
-        'SELECT id FROM Reservas WHERE tecnico_id = ? AND fecha_servicio = ? AND estado_id NOT IN (SELECT id FROM EstadosReserva WHERE estado IN ("completada", "cancelada"))',
+        'SELECT id FROM Reservas WHERE tecnico_id = ? AND fecha_servicio = ? AND estado_id NOT IN (SELECT id FROM EstadosReserva WHERE nombre IN ("completada", "cancelada"))',
         [tecnico_id, fecha_servicio]
       );
       
@@ -195,71 +195,57 @@ const createAgendamiento = async (req, res) => {
     
     await connection.commit();
     
-    // Preparar datos para emails
+    // Enviar correo de confirmación (fuera de la transacción)
     const clienteData = clienteRows[0];
     const tipoServicioData = tipoServicioRows[0];
-    const ubicacionData = ubicacionRows[0];
     
-    let tecnicoData = null;
-    if (tecnico_id) {
-      const [tecnicoQuery] = await connection.query(
-        'SELECT nombre, apellido, email, telefono FROM Usuarios WHERE id = ?', 
-        [tecnico_id]
-      );
-      tecnicoData = tecnicoQuery[0];
-    }
-    
-    // Enviar correos de notificación usando el nuevo servicio
-    try {
-      const reservaData = {
-        cliente: clienteData,
-        reserva: {
-          id: reservaId,
-          fecha_servicio: fecha_servicio,
-          precio_total: precio_total,
-          observaciones: observaciones,
-          estado: 'pendiente'
-        },
-        servicio: {
-          tipo: tipoServicioData.nombre,
-          descripcion: tipoServicioData.descripcion || 'Servicio de limpieza con vapor profesional'
-        },
-        ubicacion: ubicacionData,
-        tecnico: tecnicoData
-      };
-
-      // Email de confirmación al cliente
-      const emailResult = await emailService.sendReservaConfirmation(reservaData);
-      if (emailResult.success) {
-        console.log(`✅ Email de confirmación enviado a: ${clienteData.email}`);
-      } else {
-        console.log(`❌ Error enviando email de confirmación: ${emailResult.error}`);
+    if (clienteData && clienteData.email) {
+      try {
+        const fechaFormateada = new Date(fecha_servicio).toLocaleString('es-CO', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER || 'yeygok777@gmail.com',
+          to: clienteData.email,
+          subject: 'Confirmación de Reserva - Lavado Vapor Bogotá',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #2c3e50;">¡Tu reserva ha sido confirmada!</h2>
+              <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
+                <h3 style="color: #34495e;">Detalles de tu reserva:</h3>
+                <p><strong>🏷️ ID de Reserva:</strong> ${reservaId}</p>
+                <p><strong>� Cliente:</strong> ${clienteData.nombre} ${clienteData.apellido}</p>
+                <p><strong>� Fecha y Hora:</strong> ${fechaFormateada}</p>
+                <p><strong>🚿 Tipo de Servicio:</strong> ${tipoServicioData.nombre}</p>
+                <p><strong>💰 Precio Total:</strong> $${parseFloat(precio_total).toLocaleString('es-CO', { minimumFractionDigits: 2 })}</p>
+                ${observaciones ? `<p><strong>📝 Observaciones:</strong> ${observaciones}</p>` : ''}
+              </div>
+              <p style="color: #27ae60; font-weight: bold; text-align: center; font-size: 18px;">¡Gracias por confiar en Lavado Vapor Bogotá!</p>
+              <div style="background-color: #fff3cd; padding: 10px; border-radius: 5px; margin: 20px 0;">
+                <p style="color: #856404; margin: 0;"><strong>Nota:</strong> Guarda este correo como comprobante de tu reserva. Nos pondremos en contacto contigo para confirmar los detalles.</p>
+              </div>
+            </div>
+          `
+        });
+        console.log(`Correo de confirmación enviado a: ${clienteData.email}`);
+      } catch (emailError) {
+        console.error('Error al enviar correo de confirmación:', emailError.message);
+        // No fallar la respuesta si el correo falla
       }
-      
-      // Email al técnico si está asignado
-      if (tecnicoData && tecnicoData.email) {
-        const tecnicoEmailResult = await emailService.sendTecnicoNotification(reservaData);
-        if (tecnicoEmailResult.success) {
-          console.log(`✅ Email de notificación enviado al técnico: ${tecnicoData.email}`);
-        } else {
-          console.log(`❌ Error enviando email al técnico: ${tecnicoEmailResult.error}`);
-        }
-      }
-      
-    } catch (emailError) {
-      console.error('❌ Error al enviar emails de notificación:', emailError.message);
-      // No fallar la respuesta si los correos fallan
     }
     
     res.status(201).json({ 
       id: reservaId,
-      mensaje: 'Reserva creada exitosamente y emails enviados',
+      mensaje: 'Reserva creada exitosamente',
       cliente: `${clienteData.nombre} ${clienteData.apellido}`,
       fecha_servicio: fecha_servicio,
       precio_total: precio_total,
-      tipo_servicio: tipoServicioData.nombre,
-      ubicacion: `${ubicacionData.direccion}, ${ubicacionData.barrio}`,
-      tecnico: tecnicoData ? `${tecnicoData.nombre} ${tecnicoData.apellido}` : 'Por asignar'
+      tipo_servicio: tipoServicioData.nombre
     });
     
   } catch (error) {
@@ -301,26 +287,8 @@ const updateAgendamiento = async (req, res) => {
     });
   }
   
-  const connection = await pool.getConnection();
-  
   try {
-    // Obtener estado anterior para notificaciones
-    const [reservaAnterior] = await connection.query(`
-      SELECT r.*, er.estado as estado_anterior, 
-             uc.email as cliente_email, uc.nombre as cliente_nombre, uc.apellido as cliente_apellido,
-             ut.email as tecnico_email, ut.nombre as tecnico_nombre, ut.apellido as tecnico_apellido
-      FROM Reservas r 
-      LEFT JOIN EstadosReserva er ON r.estado_id = er.id
-      LEFT JOIN Usuarios uc ON r.cliente_id = uc.id
-      LEFT JOIN Usuarios ut ON r.tecnico_id = ut.id
-      WHERE r.id = ?
-    `, [req.params.id]);
-    
-    if (reservaAnterior.length === 0) {
-      return res.status(404).json({ error: 'Reserva no encontrada' });
-    }
-    
-    const [result] = await connection.query(
+    const [result] = await pool.query(
       `UPDATE Reservas SET 
         tecnico_id = ?, 
         vehiculo_id = ?, 
@@ -351,55 +319,14 @@ const updateAgendamiento = async (req, res) => {
       return res.status(404).json({ error: 'Reserva no encontrada' });
     }
     
-    // Obtener nuevo estado para notificaciones
-    const [nuevoEstado] = await connection.query('SELECT estado FROM EstadosReserva WHERE id = ?', [estado_id]);
-    
-    // Enviar notificación de cambio de estado si cambió
-    if (reservaAnterior[0].estado_id !== estado_id && reservaAnterior[0].cliente_email) {
-      try {
-        const reservaData = {
-          cliente: {
-            nombre: reservaAnterior[0].cliente_nombre,
-            apellido: reservaAnterior[0].cliente_apellido,
-            email: reservaAnterior[0].cliente_email
-          },
-          reserva: {
-            id: req.params.id,
-            fecha_servicio: fecha_servicio,
-            precio_total: precio_total
-          },
-          tecnico: tecnico_id && reservaAnterior[0].tecnico_nombre ? {
-            nombre: reservaAnterior[0].tecnico_nombre,
-            apellido: reservaAnterior[0].tecnico_apellido,
-            telefono: reservaAnterior[0].tecnico_telefono
-          } : null
-        };
-        
-        await emailService.sendStatusUpdate(
-          reservaData, 
-          nuevoEstado[0].estado, 
-          reservaAnterior[0].estado_anterior
-        );
-        console.log(`✅ Email de actualización enviado por cambio de estado`);
-        
-      } catch (emailError) {
-        console.error('❌ Error enviando email de actualización:', emailError.message);
-      }
-    }
-    
     res.json({ 
       id: req.params.id, 
-      mensaje: 'Reserva actualizada exitosamente',
-      estado_anterior: reservaAnterior[0].estado_anterior,
-      estado_nuevo: nuevoEstado[0].estado
+      mensaje: 'Reserva actualizada exitosamente' 
     });
-    
   } catch (error) {
     console.error('Error al actualizar reserva:', error.message);
     console.error('Stack trace:', error.stack);
     res.status(500).json({ error: 'Error al actualizar reserva' });
-  } finally {
-    connection.release();
   }
 };
 
@@ -446,7 +373,7 @@ const checkDisponibilidad = async (req, res) => {
     
     // Verificar disponibilidad para el cliente específico
     const [reservasCliente] = await pool.query(
-      'SELECT id, fecha_servicio FROM Reservas WHERE fecha_servicio = ? AND cliente_id = ? AND estado_id NOT IN (SELECT id FROM EstadosReserva WHERE estado IN ("completada", "cancelada"))',
+      'SELECT id, fecha_servicio FROM Reservas WHERE fecha_servicio = ? AND cliente_id = ? AND estado_id NOT IN (SELECT id FROM EstadosReserva WHERE nombre IN ("completada", "cancelada"))',
       [fecha_servicio, cliente_id]
     );
     
@@ -469,7 +396,7 @@ const checkDisponibilidad = async (req, res) => {
       }
       
       const [reservasTecnico] = await pool.query(
-        'SELECT id FROM Reservas WHERE fecha_servicio = ? AND tecnico_id = ? AND estado_id NOT IN (SELECT id FROM EstadosReserva WHERE estado IN ("completada", "cancelada"))',
+        'SELECT id FROM Reservas WHERE fecha_servicio = ? AND tecnico_id = ? AND estado_id NOT IN (SELECT id FROM EstadosReserva WHERE nombre IN ("completada", "cancelada"))',
         [fecha_servicio, tecnico_id]
       );
       
@@ -484,7 +411,7 @@ const checkDisponibilidad = async (req, res) => {
     
     // Verificar capacidad general del horario
     const [totalReservas] = await pool.query(
-      'SELECT COUNT(*) as total FROM Reservas WHERE fecha_servicio = ? AND estado_id NOT IN (SELECT id FROM EstadosReserva WHERE estado IN ("completada", "cancelada"))',
+      'SELECT COUNT(*) as total FROM Reservas WHERE fecha_servicio = ? AND estado_id NOT IN (SELECT id FROM EstadosReserva WHERE nombre IN ("completada", "cancelada"))',
       [fecha_servicio]
     );
     
@@ -528,7 +455,7 @@ const getAgendamientoDetalle = async (req, res) => {
         ut.nombre as tecnico_nombre,
         ut.apellido as tecnico_apellido,
         ut.email as tecnico_email,
-        er.estado as estado_nombre,
+        er.nombre as estado_nombre,
         er.descripcion as estado_descripcion,
         ts.nombre as tipo_servicio,
         ts.descripcion as tipo_servicio_descripcion,
@@ -536,10 +463,10 @@ const getAgendamientoDetalle = async (req, res) => {
         v.modelo as vehiculo_modelo,
         v.placa as vehiculo_placa,
         v.capacidad_tanque,
+        ub.nombre as ubicacion_nombre,
         ub.direccion as ubicacion_direccion,
         ub.barrio as ubicacion_barrio,
-        ub.localidad as ubicacion_localidad,
-        ub.zona as ubicacion_zona
+        ub.ciudad as ubicacion_ciudad
       FROM Reservas r
       LEFT JOIN Usuarios uc ON r.cliente_id = uc.id
       LEFT JOIN Usuarios ut ON r.tecnico_id = ut.id
@@ -556,6 +483,27 @@ const getAgendamientoDetalle = async (req, res) => {
     
     const reserva = reservas[0];
     
+    // Obtener servicios relacionados (si existe tabla de relación)
+    let servicios = [];
+    try {
+      const [serviciosData] = await pool.query(`
+        SELECT 
+          s.id,
+          s.nombre,
+          s.descripcion,
+          s.precio_base,
+          s.duracion_estimada,
+          cs.nombre as categoria
+        FROM Servicios s
+        LEFT JOIN CategoriasServicios cs ON s.categoria_id = cs.id
+        WHERE s.activo = 1
+        LIMIT 5
+      `);
+      servicios = serviciosData;
+    } catch (error) {
+      console.log('No se pudieron obtener servicios relacionados:', error.message);
+    }
+    
     // Calcular costo con multiplicador
     const costoBase = parseFloat(reserva.precio_total) || 0;
     const multiplicador = parseFloat(reserva.multiplicador_precio) || 1;
@@ -563,6 +511,7 @@ const getAgendamientoDetalle = async (req, res) => {
     
     const response = {
       ...reserva,
+      servicios: servicios,
       costo_calculado: {
         base: costoBase,
         multiplicador: multiplicador,
@@ -589,10 +538,10 @@ const getAgendamientoDetalle = async (req, res) => {
       } : null,
       ubicacion: {
         id: reserva.ubicacion_servicio_id,
+        nombre: reserva.ubicacion_nombre,
         direccion: reserva.ubicacion_direccion,
         barrio: reserva.ubicacion_barrio,
-        localidad: reserva.ubicacion_localidad,
-        zona: reserva.ubicacion_zona
+        ciudad: reserva.ubicacion_ciudad
       }
     };
     
@@ -604,22 +553,6 @@ const getAgendamientoDetalle = async (req, res) => {
   }
 };
 
-// Endpoint para test de emails
-const testEmail = async (req, res) => {
-  try {
-    const testResult = await emailService.testConnection();
-    res.json({
-      mensaje: 'Test de conexión de email',
-      resultado: testResult
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: 'Error en test de email',
-      detalle: error.message
-    });
-  }
-};
-
 module.exports = {
   getAllAgendamientos,
   getAgendamientoById,
@@ -628,5 +561,4 @@ module.exports = {
   deleteAgendamiento,
   checkDisponibilidad,
   getAgendamientoDetalle,
-  testEmail
 };
