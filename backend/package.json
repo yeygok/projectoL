@@ -4,7 +4,15 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "analyze:db": "node scripts/analyzeDatabase.js",
+    "analyze:data": "node scripts/analyzeDataRelations.js",
+    "analyze:full": "node scripts/runFullAnalysis.js",
+    "step1": "node scripts/step1-testConnection.js",
+    "step2": "node scripts/step2-listTables.js",
+    "step3": "node scripts/step3-analyzeMainTables.js",
+    "step4": "node scripts/step4-findRelations.js",
+    "step5": "node scripts/step5-securityAnalysis.js"
   },
   "keywords": [],
   "author": "",

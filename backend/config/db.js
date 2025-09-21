@@ -7,7 +7,7 @@ const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: 'SecurePass123!',
-  database: 'megalavado',
+  database: 'LavadoVaporBogotaDB',
   port: 3306,
   waitForConnections: true,
   connectionLimit: 10,
@@ -17,7 +17,7 @@ const pool = mysql.createPool({
 // Test connection
 pool.getConnection()
   .then(conn => {
-    console.log('Conectado a la base de datos MySQL - megalavado');
+    console.log('Conectado a la base de datos MySQL - LavadoVaporBogotaDB');
     conn.release();
   })
   .catch(err => {
