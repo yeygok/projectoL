@@ -3,6 +3,10 @@ export { default as Card } from './Card';
 export { default as Button } from './Button';
 export { default as StatCard } from './StatCard';
 export { default as Input, SelectInput, AutocompleteInput } from './Input';
+export { default as DataTable } from './DataTable';
+export { default as FormDialog } from './FormDialog';
+export { default as PageHeader } from './PageHeader';
+export { NotificationProvider, useNotification } from './NotificationProvider';
 
 // Re-exportaciones de Material UI para consistencia
 export {
