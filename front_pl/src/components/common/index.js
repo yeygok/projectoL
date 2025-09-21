@@ -7,6 +7,7 @@ export { default as DataTable } from './DataTable';
 export { default as FormDialog } from './FormDialog';
 export { default as PageHeader } from './PageHeader';
 export { NotificationProvider, useNotification } from './NotificationProvider';
+export { default as ProtectedRoute, RoleGuard, withRoleProtection, usePermissions } from './ProtectedRoute';
 
 // Re-exportaciones de Material UI para consistencia
 export {

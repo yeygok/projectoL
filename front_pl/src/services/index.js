@@ -32,6 +32,17 @@ export const authService = {
   async resetPassword(token, password) {
     return apiService.post('/api/auth/reset-password', { token, password });
   },
+
+  async updateProfile(profileData) {
+    return apiService.put('/api/auth/profile', profileData);
+  },
+
+  async changePassword(currentPassword, newPassword) {
+    return apiService.post('/api/auth/change-password', { 
+      currentPassword, 
+      newPassword 
+    });
+  },
 };
 
 // Servicio de dashboard
