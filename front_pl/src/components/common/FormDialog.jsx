@@ -18,15 +18,15 @@ import {
   Chip,
   Switch,
   FormControlLabel,
-  DatePicker,
-  TimePicker,
   IconButton,
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { Close as CloseIcon } from '@mui/icons-material';
-import { es } from 'date-fns/locale';
+import { es } from 'date-fns/locale/es';
 
 const FormDialog = ({
   open,

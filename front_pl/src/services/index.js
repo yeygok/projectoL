@@ -94,169 +94,259 @@ export const agendamientoService = {
 // Servicio de clientes
 export const clienteService = {
   async getAll(params = {}) {
-    return apiService.get('/api/cliente', params);
+    return apiService.get('/api/clientes', params);
   },
 
   async getById(id) {
-    return apiService.get(`/api/cliente/${id}`);
+    return apiService.get(`/api/clientes/${id}`);
   },
 
   async create(data) {
-    return apiService.post('/api/cliente', data);
+    return apiService.post('/api/clientes', data);
   },
 
   async update(id, data) {
-    return apiService.put(`/api/cliente/${id}`, data);
+    return apiService.put(`/api/clientes/${id}`, data);
   },
 
   async delete(id) {
-    return apiService.delete(`/api/cliente/${id}`);
+    return apiService.delete(`/api/clientes/${id}`);
   },
 
   async getConReservas() {
-    return apiService.get('/api/cliente/con-reservas');
+    return apiService.get('/api/clientes/con-reservas');
   },
 
   async convertirACliente(usuarioId) {
-    return apiService.post('/api/cliente/convertir', { usuario_id: usuarioId });
+    return apiService.post('/api/clientes/convertir', { usuario_id: usuarioId });
   },
 };
 
 // Servicio de servicios
 export const servicioService = {
   async getAll(params = {}) {
-    return apiService.get('/api/service', params);
+    return apiService.get('/api/services', params);
   },
 
   async getById(id) {
-    return apiService.get(`/api/service/${id}`);
+    return apiService.get(`/api/services/${id}`);
   },
 
   async create(data) {
-    return apiService.post('/api/service', data);
+    return apiService.post('/api/services', data);
   },
 
   async update(id, data) {
-    return apiService.put(`/api/service/${id}`, data);
+    return apiService.put(`/api/services/${id}`, data);
   },
 
   async delete(id) {
-    return apiService.delete(`/api/service/${id}`);
+    return apiService.delete(`/api/services/${id}`);
   },
 
   async getActivos() {
-    return apiService.get('/api/service?activo=1');
+    return apiService.get('/api/services?activo=1');
   },
 };
 
-// Servicio de usuarios
-export const usuarioService = {
+// Alias para mantener compatibilidad
+export const serviceService = servicioService;
+
+// Servicio de productos (usa servicios por ahora hasta crear la ruta)
+export const productService = {
   async getAll(params = {}) {
-    return apiService.get('/api/usuario', params);
+    return apiService.get('/api/services', params);
   },
 
   async getById(id) {
-    return apiService.get(`/api/usuario/${id}`);
+    return apiService.get(`/api/services/${id}`);
   },
 
   async create(data) {
-    return apiService.post('/api/usuario', data);
+    return apiService.post('/api/services', data);
   },
 
   async update(id, data) {
-    return apiService.put(`/api/usuario/${id}`, data);
+    return apiService.put(`/api/services/${id}`, data);
   },
 
   async delete(id) {
-    return apiService.delete(`/api/usuario/${id}`);
+    return apiService.delete(`/api/services/${id}`);
   },
 
-  async updateProfile(data) {
-    return apiService.put('/api/perfil', data);
-  },
-
-  async changePassword(passwordData) {
-    return apiService.put('/api/usuario/password', passwordData);
+  async getActivos() {
+    return apiService.get('/api/services?activo=1');
   },
 };
 
-// Servicio de roles
-export const rolService = {
+// Servicio de tipos de documento (mock temporal)
+export const tipoDocumentoService = {
   async getAll(params = {}) {
-    return apiService.get('/api/rol', params);
+    // Mock data temporal hasta crear la ruta
+    return [
+      { id_tipo_documento: 1, nombre_tipo_documento: 'Cédula' },
+      { id_tipo_documento: 2, nombre_tipo_documento: 'Pasaporte' },
+      { id_tipo_documento: 3, nombre_tipo_documento: 'Tarjeta de identidad' }
+    ];
   },
 
   async getById(id) {
-    return apiService.get(`/api/rol/${id}`);
+    return { id_tipo_documento: id, nombre_tipo_documento: 'Documento' };
   },
 
   async create(data) {
-    return apiService.post('/api/rol', data);
+    return { ...data, id_tipo_documento: Date.now() };
   },
 
   async update(id, data) {
-    return apiService.put(`/api/rol/${id}`, data);
+    return { ...data, id_tipo_documento: id };
   },
 
   async delete(id) {
-    return apiService.delete(`/api/rol/${id}`);
-  },
-
-  async getWithUsers() {
-    return apiService.get('/api/rol/with-users');
-  },
-};
-
-// Servicio de permisos
-export const permisoService = {
-  async getAll(params = {}) {
-    return apiService.get('/api/permiso', params);
-  },
-
-  async getById(id) {
-    return apiService.get(`/api/permiso/${id}`);
-  },
-
-  async create(data) {
-    return apiService.post('/api/permiso', data);
-  },
-
-  async update(id, data) {
-    return apiService.put(`/api/permiso/${id}`, data);
-  },
-
-  async delete(id) {
-    return apiService.delete(`/api/permiso/${id}`);
-  },
-
-  async getByRole(roleId) {
-    return apiService.get(`/api/rol/${roleId}/permisos`);
-  },
-
-  async assignToRole(roleId, permisoIds) {
-    return apiService.post(`/api/rol-permiso`, { rol_id: roleId, permiso_ids: permisoIds });
+    return { success: true };
   },
 };
 
 // Servicio de tipos de servicio
 export const tipoServicioService = {
   async getAll(params = {}) {
-    return apiService.get('/api/tipo_servicio', params);
+    return apiService.get('/api/tipos-servicio', params);
   },
 
   async getById(id) {
-    return apiService.get(`/api/tipo_servicio/${id}`);
+    return apiService.get(`/api/tipos-servicio/${id}`);
   },
 
   async create(data) {
-    return apiService.post('/api/tipo_servicio', data);
+    return apiService.post('/api/tipos-servicio', data);
   },
 
   async update(id, data) {
-    return apiService.put(`/api/tipo_servicio/${id}`, data);
+    return apiService.put(`/api/tipos-servicio/${id}`, data);
   },
 
   async delete(id) {
-    return apiService.delete(`/api/tipo_servicio/${id}`);
+    return apiService.delete(`/api/tipos-servicio/${id}`);
+  },
+};
+
+// Servicio de usuarios
+export const usuarioService = {
+  async getAll(params = {}) {
+    return apiService.get('/api/dashboard/usuarios', params);
+  },
+
+  async getById(id) {
+    return apiService.get(`/api/dashboard/usuarios/${id}`);
+  },
+
+  async create(data) {
+    return apiService.post('/api/dashboard/usuarios', data);
+  },
+
+  async update(id, data) {
+    return apiService.put(`/api/dashboard/usuarios/${id}`, data);
+  },
+
+  async delete(id) {
+    return apiService.delete(`/api/dashboard/usuarios/${id}`);
+  },
+
+  async updateProfile(data) {
+    return apiService.put('/api/perfiles', data);
+  },
+
+  async changePassword(passwordData) {
+    return apiService.put('/api/dashboard/usuarios/password', passwordData);
+  },
+};
+
+// Alias para mantener compatibilidad
+export const userService = usuarioService;
+
+// Servicio de estados de usuario (mock temporal)
+export const estadoUsuarioService = {
+  async getAll(params = {}) {
+    // Mock data temporal hasta crear la ruta
+    return [
+      { id_estado_usuario: 1, nombre_estado: 'Activo' },
+      { id_estado_usuario: 2, nombre_estado: 'Inactivo' },
+      { id_estado_usuario: 3, nombre_estado: 'Suspendido' },
+      { id_estado_usuario: 4, nombre_estado: 'Bloqueado' }
+    ];
+  },
+
+  async getById(id) {
+    return { id_estado_usuario: id, nombre_estado: 'Estado' };
+  },
+
+  async create(data) {
+    return { ...data, id_estado_usuario: Date.now() };
+  },
+
+  async update(id, data) {
+    return { ...data, id_estado_usuario: id };
+  },
+
+  async delete(id) {
+    return { success: true };
+  },
+};
+
+// Servicio de roles
+export const rolService = {
+  async getAll(params = {}) {
+    return apiService.get('/api/roles', params);
+  },
+
+  async getById(id) {
+    return apiService.get(`/api/roles/${id}`);
+  },
+
+  async create(data) {
+    return apiService.post('/api/roles', data);
+  },
+
+  async update(id, data) {
+    return apiService.put(`/api/roles/${id}`, data);
+  },
+
+  async delete(id) {
+    return apiService.delete(`/api/roles/${id}`);
+  },
+
+  async getWithUsers() {
+    return apiService.get('/api/roles/with-users');
+  },
+};
+
+// Servicio de permisos
+export const permisoService = {
+  async getAll(params = {}) {
+    return apiService.get('/api/permisos', params);
+  },
+
+  async getById(id) {
+    return apiService.get(`/api/permisos/${id}`);
+  },
+
+  async create(data) {
+    return apiService.post('/api/permisos', data);
+  },
+
+  async update(id, data) {
+    return apiService.put(`/api/permisos/${id}`, data);
+  },
+
+  async delete(id) {
+    return apiService.delete(`/api/permisos/${id}`);
+  },
+
+  async getByRole(roleId) {
+    return apiService.get(`/api/roles/${roleId}/permisos`);
+  },
+
+  async assignToRole(roleId, permisoIds) {
+    return apiService.post(`/api/rol-permisos`, { rol_id: roleId, permiso_ids: permisoIds });
   },
 };

@@ -15,6 +15,7 @@ import {
   Alert,
   Button,
   Stack,
+  CircularProgress,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -305,13 +306,15 @@ const DashboardHome = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {loadingReservas ? (
+              {reservasLoading ? (
                 <TableRow>
                   <TableCell colSpan={5} align="center">
-                    <CircularProgress sx={{ my: 2 }} />
+                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+                      <Typography>Cargando reservas...</Typography>
+                    </Box>
                   </TableCell>
                 </TableRow>
-              ) : errorReservas ? (
+              ) : reservasError ? (
                 <TableRow>
                   <TableCell colSpan={5} align="center">
                     <Typography color="error" sx={{ py: 4 }}>
@@ -319,8 +322,8 @@ const DashboardHome = () => {
                     </Typography>
                   </TableCell>
                 </TableRow>
-              ) : reservasData && reservasData.length > 0 ? (
-                reservasData.slice(0, 5).map((reserva) => (
+              ) : recentReservas && recentReservas.length > 0 ? (
+                recentReservas.slice(0, 5).map((reserva) => (
                   <TableRow key={reserva.id_agendamiento} hover>
                     <TableCell>
                       <Typography variant="subtitle2">
@@ -374,4 +377,4 @@ const DashboardHome = () => {
   );
 };
 
-export default DashboardHomeMUI;
+export default DashboardHome;

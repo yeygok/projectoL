@@ -7,12 +7,13 @@ import { AuthProvider, useAuth, ROLES } from './context/AuthContext';
 import { ProtectedRoute } from './components/common';
 
 // Páginas
+import Home from './pages/Home';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ClienteProfile from './pages/ClienteProfile';
 
-// Componente para redireccionar según el rol
-const RoleBasedRedirect = () => {
+// Componente para redireccionar según el rol (solo para usuarios autenticados)
+const DashboardRedirect = () => {
   const { user, isAuthenticated } = useAuth();
 
   if (!isAuthenticated) {
@@ -36,11 +37,14 @@ const RoleBasedRedirect = () => {
 const AppRoutes = () => {
   return (
     <Routes>
+      {/* Página de inicio pública */}
+      <Route path="/" element={<Home />} />
+      
       {/* Ruta pública - Login */}
       <Route path="/login" element={<Login />} />
       
-      {/* Redirección basada en rol */}
-      <Route path="/" element={<RoleBasedRedirect />} />
+      {/* Redirección automática al dashboard para usuarios autenticados */}
+      <Route path="/app" element={<DashboardRedirect />} />
       
       {/* Rutas de Admin */}
       <Route 
@@ -76,8 +80,8 @@ const AppRoutes = () => {
         } 
       />
       
-      {/* Ruta catch-all - redirige según autenticación */}
-      <Route path="*" element={<RoleBasedRedirect />} />
+      {/* Ruta catch-all - va al home */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };

@@ -38,16 +38,16 @@ export const useApi = (apiCall, dependencies = []) => {
 
 // Hook para operaciones CRUD
 export const useCrud = (service) => {
-  const [items, setItems] = useState([]);
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const loadItems = async () => {
+  const refetch = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await service.getAll();
-      setItems(data);
+      const result = await service.getAll();
+      setData(result);
     } catch (err) {
       setError(err instanceof ApiError ? err : new ApiError(err.message));
     } finally {
@@ -55,65 +55,71 @@ export const useCrud = (service) => {
     }
   };
 
-  const createItem = async (data) => {
+  const create = async (itemData) => {
     try {
       setLoading(true);
-      const newItem = await service.create(data);
-      setItems(prev => [...prev, newItem]);
+      const newItem = await service.create(itemData);
+      setData(prev => [...prev, newItem]);
       return { success: true, data: newItem };
     } catch (err) {
       const error = err instanceof ApiError ? err : new ApiError(err.message);
       setError(error);
-      return { success: false, error };
+      throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  const updateItem = async (id, data) => {
+  const update = async (id, itemData) => {
     try {
       setLoading(true);
-      const updatedItem = await service.update(id, data);
-      setItems(prev => prev.map(item => 
-        item.id === id ? { ...item, ...updatedItem } : item
-      ));
+      const updatedItem = await service.update(id, itemData);
+      setData(prev => prev.map(item => {
+        // Try different possible id field names
+        const itemId = item.id || item.id_usuario || item.id_cliente || item.id_servicio;
+        return itemId === id ? { ...item, ...updatedItem } : item;
+      }));
       return { success: true, data: updatedItem };
     } catch (err) {
       const error = err instanceof ApiError ? err : new ApiError(err.message);
       setError(error);
-      return { success: false, error };
+      throw error;
     } finally {
       setLoading(false);
     }
   };
 
-  const deleteItem = async (id) => {
+  const remove = async (id) => {
     try {
       setLoading(true);
       await service.delete(id);
-      setItems(prev => prev.filter(item => item.id !== id));
+      setData(prev => prev.filter(item => {
+        // Try different possible id field names
+        const itemId = item.id || item.id_usuario || item.id_cliente || item.id_servicio;
+        return itemId !== id;
+      }));
       return { success: true };
     } catch (err) {
       const error = err instanceof ApiError ? err : new ApiError(err.message);
       setError(error);
-      return { success: false, error };
+      throw error;
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadItems();
+    refetch();
   }, []);
 
   return {
-    items,
+    data,
     loading,
     error,
-    loadItems,
-    createItem,
-    updateItem,
-    deleteItem,
+    refetch,
+    create,
+    update,
+    remove,
   };
 };
 
