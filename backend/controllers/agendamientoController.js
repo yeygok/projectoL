@@ -112,7 +112,14 @@ const createAgendamiento = async (req, res) => {
     );
     
     if (clienteRows.length === 0) {
-      throw new Error(`Cliente con ID ${cliente_id} no encontrado o no tiene rol de cliente`);
+      // Verificar si el usuario existe pero con otro rol
+      const [usuarioRows] = await connection.query('SELECT id, rol_id FROM Usuarios WHERE id = ?', [cliente_id]);
+      if (usuarioRows.length === 0) {
+        throw new Error(`Usuario con ID ${cliente_id} no existe en la base de datos`);
+      } else {
+        const [rolRows] = await connection.query('SELECT nombre FROM Roles WHERE id = ?', [usuarioRows[0].rol_id]);
+        throw new Error(`Usuario con ID ${cliente_id} existe pero tiene rol "${rolRows[0].nombre}" en lugar de "cliente"`);
+      }
     }
     
     // Validar que el técnico exista si se especifica
@@ -264,18 +271,24 @@ const createAgendamiento = async (req, res) => {
     
   } catch (error) {
     await connection.rollback();
-    console.error('Error al crear reserva:', error.message);
+    console.error('❌ Error al crear reserva:', error.message);
     console.error('Stack trace:', error.stack);
     
     // Respuesta de error más específica
-    if (error.message.includes('no encontrado')) {
+    if (error.message.includes('no encontrado') || error.message.includes('no existe')) {
       return res.status(404).json({ error: error.message });
     } else if (error.message.includes('ya tiene una reserva')) {
       return res.status(409).json({ error: error.message });
     } else if (error.message.includes('formato') || error.message.includes('inválido')) {
       return res.status(400).json({ error: error.message });
+    } else if (error.message.includes('tiene rol')) {
+      return res.status(400).json({ error: error.message });
     } else {
-      return res.status(500).json({ error: 'Error interno al crear reserva' });
+      return res.status(500).json({ 
+        error: 'Error interno al crear reserva',
+        detalle: error.message,
+        stack: error.stack
+      });
     }
   } finally {
     connection.release();
@@ -284,6 +297,7 @@ const createAgendamiento = async (req, res) => {
 
 const updateAgendamiento = async (req, res) => {
   const { 
+    cliente_id,
     tecnico_id, 
     vehiculo_id, 
     servicio_tipo_id, 
@@ -295,10 +309,18 @@ const updateAgendamiento = async (req, res) => {
     notas_tecnico 
   } = req.body;
   
+  // Validación de campos requeridos
   if (!servicio_tipo_id || !ubicacion_servicio_id || !fecha_servicio || !precio_total || !estado_id) {
     return res.status(400).json({ 
-      error: 'Campos requeridos: servicio_tipo_id, ubicacion_servicio_id, fecha_servicio, precio_total, estado_id' 
+      error: 'Campos requeridos: servicio_tipo_id, ubicacion_servicio_id, fecha_servicio, precio_total, estado_id',
+      received: { servicio_tipo_id, ubicacion_servicio_id, fecha_servicio, precio_total, estado_id }
     });
+  }
+
+  // Validación de formato de fecha
+  const fechaServicio = new Date(fecha_servicio);
+  if (isNaN(fechaServicio.getTime())) {
+    return res.status(400).json({ error: 'Formato de fecha_servicio inválido. Use formato ISO: YYYY-MM-DDTHH:MM:SS' });
   }
   
   const connection = await pool.getConnection();
@@ -320,8 +342,60 @@ const updateAgendamiento = async (req, res) => {
       return res.status(404).json({ error: 'Reserva no encontrada' });
     }
     
+    await connection.beginTransaction();
+
+    // Validar que la reserva exista
+    if (reservaAnterior.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ error: 'Reserva no encontrada' });
+    }
+
+    // Validar que el estado exista
+    const [estadoRows] = await connection.query('SELECT id, estado FROM EstadosReserva WHERE id = ?', [estado_id]);
+    if (estadoRows.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ error: `Estado con ID ${estado_id} no encontrado` });
+    }
+
+    // Validar que el tipo de servicio exista
+    const [tipoServicioRows] = await connection.query('SELECT id FROM TiposServicio WHERE id = ?', [servicio_tipo_id]);
+    if (tipoServicioRows.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ error: `Tipo de servicio con ID ${servicio_tipo_id} no encontrado` });
+    }
+
+    // Validar que la ubicación exista
+    const [ubicacionRows] = await connection.query('SELECT id FROM Ubicaciones WHERE id = ? AND activa = 1', [ubicacion_servicio_id]);
+    if (ubicacionRows.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ error: `Ubicación con ID ${ubicacion_servicio_id} no encontrada o inactiva` });
+    }
+
+    // Validar que el técnico exista si se especifica
+    if (tecnico_id) {
+      const [tecnicoRows] = await connection.query(
+        'SELECT id FROM Usuarios WHERE id = ? AND rol_id = (SELECT id FROM Roles WHERE nombre = "tecnico")', 
+        [tecnico_id]
+      );
+      if (tecnicoRows.length === 0) {
+        await connection.rollback();
+        return res.status(404).json({ error: `Técnico con ID ${tecnico_id} no encontrado o no tiene rol de técnico` });
+      }
+    }
+
+    // Validar que el vehículo exista si se especifica
+    if (vehiculo_id) {
+      const [vehiculoRows] = await connection.query('SELECT id FROM Vehiculos WHERE id = ? AND activo = 1', [vehiculo_id]);
+      if (vehiculoRows.length === 0) {
+        await connection.rollback();
+        return res.status(404).json({ error: `Vehículo con ID ${vehiculo_id} no encontrado o inactivo` });
+      }
+    }
+
+    // Actualizar la reserva
     const [result] = await connection.query(
       `UPDATE Reservas SET 
+        cliente_id = COALESCE(?, cliente_id),
         tecnico_id = ?, 
         vehiculo_id = ?, 
         servicio_tipo_id = ?, 
@@ -334,6 +408,7 @@ const updateAgendamiento = async (req, res) => {
         updated_at = NOW()
       WHERE id = ?`,
       [
+        cliente_id || null,
         tecnico_id || null, 
         vehiculo_id || null, 
         servicio_tipo_id, 
@@ -348,11 +423,15 @@ const updateAgendamiento = async (req, res) => {
     );
     
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Reserva no encontrada' });
+      await connection.rollback();
+      return res.status(404).json({ error: 'Error al actualizar la reserva' });
     }
+
+    await connection.commit();
+    console.log(`✅ Reserva ${req.params.id} actualizada exitosamente`);
     
     // Obtener nuevo estado para notificaciones
-    const [nuevoEstado] = await connection.query('SELECT estado FROM EstadosReserva WHERE id = ?', [estado_id]);
+    const nuevoEstado = estadoRows[0];
     
     // Enviar notificación de cambio de estado si cambió
     if (reservaAnterior[0].estado_id !== estado_id && reservaAnterior[0].cliente_email) {
@@ -377,7 +456,7 @@ const updateAgendamiento = async (req, res) => {
         
         await emailService.sendStatusUpdate(
           reservaData, 
-          nuevoEstado[0].estado, 
+          nuevoEstado.estado, 
           reservaAnterior[0].estado_anterior
         );
         console.log(`✅ Email de actualización enviado por cambio de estado`);
@@ -391,13 +470,35 @@ const updateAgendamiento = async (req, res) => {
       id: req.params.id, 
       mensaje: 'Reserva actualizada exitosamente',
       estado_anterior: reservaAnterior[0].estado_anterior,
-      estado_nuevo: nuevoEstado[0].estado
+      estado_nuevo: nuevoEstado.estado,
+      campos_actualizados: {
+        cliente_id: cliente_id || reservaAnterior[0].cliente_id,
+        tecnico_id: tecnico_id || null,
+        vehiculo_id: vehiculo_id || null,
+        servicio_tipo_id,
+        ubicacion_servicio_id,
+        fecha_servicio,
+        precio_total,
+        estado_id
+      }
     });
     
   } catch (error) {
-    console.error('Error al actualizar reserva:', error.message);
+    await connection.rollback();
+    console.error('❌ Error al actualizar reserva:', error.message);
     console.error('Stack trace:', error.stack);
-    res.status(500).json({ error: 'Error al actualizar reserva' });
+    
+    // Respuesta de error más específica
+    if (error.message.includes('no encontrado')) {
+      return res.status(404).json({ error: error.message });
+    } else if (error.message.includes('formato') || error.message.includes('inválido')) {
+      return res.status(400).json({ error: error.message });
+    } else {
+      return res.status(500).json({ 
+        error: 'Error interno al actualizar reserva',
+        detalle: error.message 
+      });
+    }
   } finally {
     connection.release();
   }

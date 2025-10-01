@@ -13,6 +13,8 @@ router.get('/test-users', async (req, res) => {
   }
 });
 
+
+
 // Importar solo rutas que existen
 const authRoutes = require('./auth');
 const serviceRoutes = require('./service');

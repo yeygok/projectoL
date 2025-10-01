@@ -77,34 +77,55 @@ class DashboardController {
       `);
 
       res.json({
-        metricas_generales: {
-          usuarios_activos: usuarios[0].total,
-          clientes: clientes[0].total,
-          tecnicos: tecnicos[0].total,
-          servicios_activos: servicios[0].total,
-          ubicaciones_activas: ubicaciones[0].total,
-          vehiculos_activos: vehiculos[0].total
-        },
-        metricas_reservas: {
-          total_reservas: totalReservas[0].total,
-          reservas_hoy: reservasHoy[0].total,
-          pendientes: reservasPendientes[0].total,
-          en_proceso: reservasEnProceso[0].total
-        },
-        metricas_financieras: {
-          ingresos_totales: parseFloat(ingresos[0].total).toFixed(2),
-          ingresos_mes_actual: parseFloat(ingresosMes[0].total).toFixed(2),
-          ticket_promedio: parseFloat(promedioTicket[0].promedio).toFixed(2)
-        },
-        reservas_por_estado: reservasPorEstado,
-        servicios_mas_solicitados: serviciosMasSolicitados,
-        tecnicos_mas_activos: tecnicosMasActivos,
-        actividad_reciente: actividadReciente
+        totalUsuarios: usuarios[0].total,
+        totalClientes: clientes[0].total,
+        totalReservas: totalReservas[0].total,
+        totalServicios: servicios[0].total,
+        reservasHoy: reservasHoy[0].total,
+        reservasPendientes: reservasPendientes[0].total,
+        ingresosMes: parseFloat(ingresosMes[0].total),
+        clientesActivos: clientes[0].total
       });
 
     } catch (error) {
       console.error('Error en dashboard stats:', error);
       res.status(500).json({ error: 'Error al obtener estadísticas del dashboard' });
+    }
+  }
+
+  async getRecentReservas(req, res) {
+    try {
+      const [reservas] = await pool.query(`
+        SELECT 
+          r.id,
+          r.fecha_reserva,
+          r.fecha_servicio,
+          r.precio_total,
+          r.observaciones,
+          r.created_at,
+          u.nombre as cliente_nombre,
+          u.apellido as cliente_apellido,
+          u.email as cliente_email,
+          u.telefono as cliente_telefono,
+          ts.nombre as servicio_nombre,
+          ts.descripcion as servicio_descripcion,
+          er.estado as estado_nombre,
+          er.color as estado_color,
+          t.nombre as tecnico_nombre,
+          t.apellido as tecnico_apellido
+        FROM Reservas r
+        LEFT JOIN Usuarios u ON r.cliente_id = u.id
+        LEFT JOIN TiposServicio ts ON r.servicio_tipo_id = ts.id
+        LEFT JOIN EstadosReserva er ON r.estado_id = er.id
+        LEFT JOIN Usuarios t ON r.tecnico_id = t.id
+        ORDER BY r.created_at DESC
+        LIMIT 10
+      `);
+      
+      res.json(reservas);
+    } catch (error) {
+      console.error('Error al obtener reservas recientes:', error);
+      res.status(500).json({ error: 'Error al obtener reservas recientes' });
     }
   }
 
@@ -199,10 +220,9 @@ class DashboardController {
   async getAllServices(req, res) {
     try {
       const [servicios] = await pool.query(`
-        SELECT s.*, cs.nombre as categoria_nombre, ts.nombre as tipo_nombre, ts.multiplicador_precio
+        SELECT s.*, cs.nombre as categoria_nombre
         FROM Servicios s
         LEFT JOIN CategoriasServicios cs ON s.categoria_id = cs.id
-        LEFT JOIN TiposServicio ts ON s.tipo_servicio_id = ts.id
         ORDER BY s.created_at DESC
       `);
       res.json(servicios);

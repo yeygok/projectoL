@@ -7,7 +7,8 @@ const { authMiddleware } = require('../middlewares/authMiddleware');
 router.use(authMiddleware);
 
 // ============= DASHBOARD PRINCIPAL =============
-router.get('/', dashboardController.getDashboardStats);
+router.get('/stats', dashboardController.getDashboardStats);
+router.get('/recent-reservas', dashboardController.getRecentReservas);
 
 // ============= GESTIÓN DE USUARIOS =============
 router.get('/usuarios', dashboardController.getAllUsers);

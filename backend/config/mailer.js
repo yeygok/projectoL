@@ -11,13 +11,13 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Verificar configuración del transporter
-transporter.verify(function (error, success) {
-  if (error) {
-    console.log('❌ Error en configuración de correo:', error);
-  } else {
-    console.log('✅ Servidor de correo listo para enviar mensajes');
-  }
-});
+// Verificar configuración del transporter - COMENTADO TEMPORALMENTE
+// transporter.verify(function (error, success) {
+//   if (error) {
+//     console.log('❌ Error en configuración de correo:', error);
+//   } else {
+//     console.log('✅ Servidor de correo listo para enviar mensajes');
+//   }
+// });
 
 module.exports = transporter;
