@@ -23,8 +23,8 @@ const DashboardClientes = () => {
   // Table columns configuration
   const columns = [
     {
-      id: 'cliente',
-      label: 'Cliente',
+      field: 'cliente',
+      headerName: 'Cliente',
       render: (item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
@@ -42,8 +42,8 @@ const DashboardClientes = () => {
       )
     },
     {
-      id: 'contacto',
-      label: 'Contacto',
+      field: 'contacto',
+      headerName: 'Contacto',
       render: (item) => (
         <div>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
@@ -58,8 +58,8 @@ const DashboardClientes = () => {
       )
     },
     {
-      id: 'documento',
-      label: 'Documento',
+      field: 'documento',
+      headerName: 'Documento',
       render: (item) => (
         <div>
           <div>{item.tipo_documento_nombre || 'N/A'}</div>
@@ -70,8 +70,8 @@ const DashboardClientes = () => {
       )
     },
     {
-      id: 'ubicacion',
-      label: 'Ubicación',
+      field: 'ubicacion',
+      headerName: 'Ubicación',
       render: (item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <LocationIcon sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />

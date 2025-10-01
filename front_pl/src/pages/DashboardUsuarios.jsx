@@ -9,7 +9,7 @@ import {
 
 // Importar componentes reutilizables
 import { DataTable, FormDialog, PageHeader, NotificationProvider } from '../components/common';
-import { userService, rolService, estadoUsuarioService } from '../services';
+import { userService, rolService } from '../services';
 import { useCrud, useApi } from '../hooks';
 
 const DashboardUsuarios = () => {
@@ -19,7 +19,6 @@ const DashboardUsuarios = () => {
   // CRUD operations
   const crudOperations = useCrud(userService);
   const { data: roles } = useApi(rolService.getAll);
-  const { data: estadosUsuario } = useApi(estadoUsuarioService.getAll);
 
   // Helper function to get role color
   const getRoleColor = (roleName) => {
@@ -46,48 +45,48 @@ const DashboardUsuarios = () => {
   // Table columns configuration
   const columns = [
     {
-      id: 'usuario',
-      label: 'Usuario',
-      render: (item) => (
+      field: 'usuario',
+      headerName: 'Usuario',
+      render: (value, row) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
-            {`${item.nombre?.charAt(0) || ''}${item.apellido?.charAt(0) || ''}`.toUpperCase()}
+            {`${row.nombre?.charAt(0) || ''}${row.apellido?.charAt(0) || ''}`.toUpperCase()}
           </Avatar>
           <div>
             <div style={{ fontWeight: 600 }}>
-              {item.nombre} {item.apellido}
+              {row.nombre} {row.apellido}
             </div>
             <div style={{ fontSize: '0.75rem', color: 'text.secondary' }}>
-              @{item.username}
+              ID: {row.id}
             </div>
           </div>
         </div>
       )
     },
     {
-      id: 'contacto',
-      label: 'Contacto',
-      render: (item) => (
+      field: 'contacto',
+      headerName: 'Contacto',
+      render: (value, row) => (
         <div>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
             <EmailIcon sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
-            {item.email}
+            {row.email}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'text.secondary' }}>
-            Tel: {item.telefono || 'No especificado'}
+            Tel: {row.telefono || 'No especificado'}
           </div>
         </div>
       )
     },
     {
-      id: 'rol',
-      label: 'Rol',
-      render: (item) => (
+      field: 'rol',
+      headerName: 'Rol',
+      render: (value, row) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <SecurityIcon sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
           <Chip
-            label={item.rol_nombre || 'Sin rol'}
-            color={getRoleColor(item.rol_nombre)}
+            label={row.rol_nombre || 'Sin rol'}
+            color={getRoleColor(row.rol_nombre)}
             size="small"
             variant="outlined"
           />
@@ -95,15 +94,16 @@ const DashboardUsuarios = () => {
       )
     },
     {
-      id: 'estado',
-      label: 'Estado',
-      render: (item) => (
+      field: 'estado',
+      headerName: 'Estado',
+      render: (value, row) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <BadgeIcon sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
           <Chip
-            label={item.estado_nombre || 'Sin estado'}
-            color={getStatusColor(item.estado_nombre)}
+            label={row.activo ? 'Activo' : 'Inactivo'}
+            color={getStatusColor(row.activo ? 'activo' : 'inactivo')}
             size="small"
+            variant="outlined"
           />
         </div>
       )
@@ -117,56 +117,55 @@ const DashboardUsuarios = () => {
       label: 'Nombre',
       type: 'text',
       required: true,
-      gridProps: { xs: 12, md: 6 }
+      md: 6
     },
     {
       name: 'apellido',
       label: 'Apellido',
       type: 'text',
       required: true,
-      gridProps: { xs: 12, md: 6 }
-    },
-    {
-      name: 'username',
-      label: 'Nombre de Usuario',
-      type: 'text',
-      required: true,
-      gridProps: { xs: 12, md: 6 }
+      md: 6
     },
     {
       name: 'email',
       label: 'Email',
       type: 'email',
       required: true,
-      gridProps: { xs: 12, md: 6 }
+      md: 6,
+      validation: (value) => {
+        if (!value?.trim()) return 'El email es requerido';
+        if (!/\S+@\S+\.\S+/.test(value)) return 'El email no tiene un formato válido';
+        return true;
+      }
     },
     {
       name: 'telefono',
       label: 'Teléfono',
       type: 'text',
-      gridProps: { xs: 12, md: 6 }
+      required: true,
+      md: 6
     },
     {
-      name: 'id_rol',
+      name: 'rol_id',
       label: 'Rol',
       type: 'select',
       required: true,
       options: roles?.map(rol => ({
-        value: rol.id_rol,
-        label: rol.nombre_rol
+        value: rol.id,
+        label: rol.nombre
       })) || [],
-      gridProps: { xs: 12, md: 6 }
+      md: 6
     },
     {
-      name: 'id_estado_usuario',
+      name: 'activo',
       label: 'Estado',
       type: 'select',
       required: true,
-      options: estadosUsuario?.map(estado => ({
-        value: estado.id_estado_usuario,
-        label: estado.nombre_estado
-      })) || [],
-      gridProps: { xs: 12, md: 6 }
+      options: [
+        { value: 1, label: 'Activo' },
+        { value: 0, label: 'Inactivo' }
+      ],
+      md: 6
     },
     ...(selectedItem ? [] : [
       {
@@ -174,7 +173,12 @@ const DashboardUsuarios = () => {
         label: 'Contraseña',
         type: 'password',
         required: true,
-        gridProps: { xs: 12, md: 6 }
+        md: 6,
+        validation: (value) => {
+          if (!value?.trim()) return 'La contraseña es requerida';
+          if (value.length < 6) return 'La contraseña debe tener al menos 6 caracteres';
+          return true;
+        }
       }
     ])
   ];
@@ -183,53 +187,11 @@ const DashboardUsuarios = () => {
   const defaultValues = {
     nombre: '',
     apellido: '',
-    username: '',
     email: '',
     telefono: '',
-    id_rol: '',
-    id_estado_usuario: '',
+    rol_id: '',
+    activo: 1,
     password: ''
-  };
-
-  // Form validation
-  const validateForm = (data) => {
-    const errors = {};
-    
-    if (!data.nombre?.trim()) {
-      errors.nombre = 'El nombre es requerido';
-    }
-    
-    if (!data.apellido?.trim()) {
-      errors.apellido = 'El apellido es requerido';
-    }
-    
-    if (!data.username?.trim()) {
-      errors.username = 'El nombre de usuario es requerido';
-    }
-    
-    if (!data.email?.trim()) {
-      errors.email = 'El email es requerido';
-    } else if (!/\S+@\S+\.\S+/.test(data.email)) {
-      errors.email = 'El email no tiene un formato válido';
-    }
-
-    if (!data.id_rol) {
-      errors.id_rol = 'El rol es requerido';
-    }
-
-    if (!data.id_estado_usuario) {
-      errors.id_estado_usuario = 'El estado es requerido';
-    }
-
-    if (!selectedItem && !data.password?.trim()) {
-      errors.password = 'La contraseña es requerida';
-    }
-
-    if (data.password && data.password.length < 6) {
-      errors.password = 'La contraseña debe tener al menos 6 caracteres';
-    }
-
-    return errors;
   };
 
   // Event handlers
@@ -241,7 +203,7 @@ const DashboardUsuarios = () => {
   const handleDelete = async (item) => {
     if (window.confirm(`¿Está seguro de eliminar al usuario ${item.nombre} ${item.apellido}?`)) {
       try {
-        await crudOperations.remove(item.id_usuario);
+        await crudOperations.remove(item.id);
       } catch (error) {
         console.error('Error deleting usuario:', error);
       }
@@ -256,7 +218,7 @@ const DashboardUsuarios = () => {
         if (!updateData.password) {
           delete updateData.password;
         }
-        await crudOperations.update(selectedItem.id_usuario, updateData);
+        await crudOperations.update(selectedItem.id, updateData);
       } else {
         await crudOperations.create(formData);
       }
@@ -300,9 +262,8 @@ const DashboardUsuarios = () => {
         }}
         title={selectedItem ? 'Editar Usuario' : 'Nuevo Usuario'}
         fields={formFields}
-        defaultValues={selectedItem || defaultValues}
+        initialData={selectedItem || defaultValues}
         onSubmit={handleSubmit}
-        validate={validateForm}
         loading={crudOperations.loading}
       />
     </NotificationProvider>

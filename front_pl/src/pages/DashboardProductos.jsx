@@ -36,8 +36,8 @@ const DashboardProductos = () => {
   // Table columns configuration
   const columns = [
     {
-      id: 'producto',
-      label: 'Producto',
+      field: 'producto',
+      headerName: 'Producto',
       render: (item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
@@ -55,8 +55,8 @@ const DashboardProductos = () => {
       )
     },
     {
-      id: 'descripcion',
-      label: 'Descripción',
+      field: 'descripcion',
+      headerName: 'Descripción',
       render: (item) => (
         <div style={{ maxWidth: 200 }}>
           <div style={{ 
@@ -72,8 +72,8 @@ const DashboardProductos = () => {
       )
     },
     {
-      id: 'precio',
-      label: 'Precio',
+      field: 'precio',
+      headerName: 'Precio',
       render: (item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <PriceIcon sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
@@ -84,8 +84,8 @@ const DashboardProductos = () => {
       )
     },
     {
-      id: 'categoria',
-      label: 'Categoría',
+      field: 'categoria',
+      headerName: 'Categoría',
       render: (item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <CategoryIcon sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
@@ -99,8 +99,8 @@ const DashboardProductos = () => {
       )
     },
     {
-      id: 'estado',
-      label: 'Estado',
+      field: 'estado',
+      headerName: 'Estado',
       render: (item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <VisibilityIcon sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
@@ -118,14 +118,14 @@ const DashboardProductos = () => {
   const formFields = [
     {
       name: 'nombre',
-      label: 'Nombre del Producto',
+      headerName: 'Nombre del Producto',
       type: 'text',
       required: true,
       gridProps: { xs: 12, md: 6 }
     },
     {
       name: 'descripcion',
-      label: 'Descripción',
+      headerName: 'Descripción',
       type: 'textarea',
       rows: 3,
       placeholder: 'Descripción detallada del producto...',
@@ -133,7 +133,7 @@ const DashboardProductos = () => {
     },
     {
       name: 'precio',
-      label: 'Precio',
+      headerName: 'Precio',
       type: 'number',
       required: true,
       min: 0,
@@ -142,32 +142,32 @@ const DashboardProductos = () => {
     },
     {
       name: 'categoria',
-      label: 'Categoría',
+      headerName: 'Categoría',
       type: 'text',
       placeholder: 'Ej: Limpieza, Mantenimiento, etc.',
       gridProps: { xs: 12, md: 6 }
     },
     {
       name: 'activo',
-      label: 'Estado',
+      headerName: 'Estado',
       type: 'select',
       required: true,
       options: [
-        { value: true, label: 'Activo' },
-        { value: false, label: 'Inactivo' }
+        { value: true, headerName: 'Activo' },
+        { value: false, headerName: 'Inactivo' }
       ],
       gridProps: { xs: 12, md: 6 }
     },
     {
       name: 'codigo_producto',
-      label: 'Código del Producto',
+      headerName: 'Código del Producto',
       type: 'text',
       placeholder: 'Código único del producto',
       gridProps: { xs: 12, md: 6 }
     },
     {
       name: 'stock_minimo',
-      label: 'Stock Mínimo',
+      headerName: 'Stock Mínimo',
       type: 'number',
       min: 0,
       placeholder: 'Cantidad mínima en inventario',
@@ -175,14 +175,14 @@ const DashboardProductos = () => {
     },
     {
       name: 'unidad_medida',
-      label: 'Unidad de Medida',
+      headerName: 'Unidad de Medida',
       type: 'select',
       options: [
-        { value: 'unidad', label: 'Unidad' },
-        { value: 'litro', label: 'Litro' },
-        { value: 'kilo', label: 'Kilogramo' },
-        { value: 'metro', label: 'Metro' },
-        { value: 'paquete', label: 'Paquete' }
+        { value: 'unidad', headerName: 'Unidad' },
+        { value: 'litro', headerName: 'Litro' },
+        { value: 'kilo', headerName: 'Kilogramo' },
+        { value: 'metro', headerName: 'Metro' },
+        { value: 'paquete', headerName: 'Paquete' }
       ],
       gridProps: { xs: 12, md: 6 }
     }

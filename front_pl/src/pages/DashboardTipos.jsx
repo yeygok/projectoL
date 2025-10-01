@@ -24,13 +24,13 @@ const DashboardTipos = () => {
   // Configuración de tabs
   const tabs = [
     {
-      label: 'Tipos de Documento',
+      headerName: 'Tipos de Documento',
       icon: <DocumentIcon />,
       crud: tipoDocumentoCrud,
       service: 'tipoDocumento'
     },
     {
-      label: 'Tipos de Servicio',
+      headerName: 'Tipos de Servicio',
       icon: <ServiceIcon />,
       crud: tipoServicioCrud,
       service: 'tipoServicio'
@@ -45,8 +45,8 @@ const DashboardTipos = () => {
     if (currentService === 'tipoDocumento') {
       return [
         {
-          id: 'tipo',
-          label: 'Tipo de Documento',
+          field: 'tipo',
+          headerName: 'Tipo de Documento',
           render: (item) => (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
@@ -64,8 +64,8 @@ const DashboardTipos = () => {
           )
         },
         {
-          id: 'descripcion',
-          label: 'Descripción',
+          field: 'descripcion',
+          headerName: 'Descripción',
           render: (item) => (
             <div style={{ maxWidth: 250 }}>
               {item.descripcion || 'Sin descripción'}
@@ -73,8 +73,8 @@ const DashboardTipos = () => {
           )
         },
         {
-          id: 'activo',
-          label: 'Estado',
+          field: 'activo',
+          headerName: 'Estado',
           render: (item) => (
             <Chip
               label={item.activo ? 'Activo' : 'Inactivo'}
@@ -87,8 +87,8 @@ const DashboardTipos = () => {
     } else {
       return [
         {
-          id: 'tipo',
-          label: 'Tipo de Servicio',
+          field: 'tipo',
+          headerName: 'Tipo de Servicio',
           render: (item) => (
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <Avatar sx={{ mr: 2, bgcolor: 'secondary.main' }}>
@@ -106,8 +106,8 @@ const DashboardTipos = () => {
           )
         },
         {
-          id: 'descripcion',
-          label: 'Descripción',
+          field: 'descripcion',
+          headerName: 'Descripción',
           render: (item) => (
             <div style={{ maxWidth: 250 }}>
               {item.descripcion || 'Sin descripción'}
@@ -115,8 +115,8 @@ const DashboardTipos = () => {
           )
         },
         {
-          id: 'precio',
-          label: 'Precio Base',
+          field: 'precio',
+          headerName: 'Precio Base',
           render: (item) => (
             <div style={{ fontWeight: 600, color: 'success.main' }}>
               {new Intl.NumberFormat('es-CO', {
@@ -128,8 +128,8 @@ const DashboardTipos = () => {
           )
         },
         {
-          id: 'activo',
-          label: 'Estado',
+          field: 'activo',
+          headerName: 'Estado',
           render: (item) => (
             <Chip
               label={item.activo ? 'Activo' : 'Inactivo'}
@@ -147,7 +147,7 @@ const DashboardTipos = () => {
       return [
         {
           name: 'nombre_tipo_documento',
-          label: 'Nombre del Tipo',
+          headerName: 'Nombre del Tipo',
           type: 'text',
           required: true,
           placeholder: 'Ej: Cédula, Pasaporte, NIT, etc.',
@@ -155,7 +155,7 @@ const DashboardTipos = () => {
         },
         {
           name: 'descripcion',
-          label: 'Descripción',
+          headerName: 'Descripción',
           type: 'textarea',
           rows: 3,
           placeholder: 'Descripción del tipo de documento...',
@@ -163,12 +163,12 @@ const DashboardTipos = () => {
         },
         {
           name: 'activo',
-          label: 'Estado',
+          headerName: 'Estado',
           type: 'select',
           required: true,
           options: [
-            { value: true, label: 'Activo' },
-            { value: false, label: 'Inactivo' }
+            { value: true, headerName: 'Activo' },
+            { value: false, headerName: 'Inactivo' }
           ],
           gridProps: { xs: 12, md: 6 }
         }
@@ -177,7 +177,7 @@ const DashboardTipos = () => {
       return [
         {
           name: 'nombre_tipo_servicio',
-          label: 'Nombre del Tipo',
+          headerName: 'Nombre del Tipo',
           type: 'text',
           required: true,
           placeholder: 'Ej: Sencillo, Premium, Gold',
@@ -185,7 +185,7 @@ const DashboardTipos = () => {
         },
         {
           name: 'descripcion',
-          label: 'Descripción',
+          headerName: 'Descripción',
           type: 'textarea',
           rows: 3,
           placeholder: 'Descripción del tipo de servicio...',
@@ -193,7 +193,7 @@ const DashboardTipos = () => {
         },
         {
           name: 'precio_base',
-          label: 'Precio Base',
+          headerName: 'Precio Base',
           type: 'number',
           min: 0,
           step: 1000,
@@ -202,12 +202,12 @@ const DashboardTipos = () => {
         },
         {
           name: 'activo',
-          label: 'Estado',
+          headerName: 'Estado',
           type: 'select',
           required: true,
           options: [
-            { value: true, label: 'Activo' },
-            { value: false, label: 'Inactivo' }
+            { value: true, headerName: 'Activo' },
+            { value: false, headerName: 'Inactivo' }
           ],
           gridProps: { xs: 12, md: 6 }
         }

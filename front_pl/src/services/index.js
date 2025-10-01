@@ -48,15 +48,15 @@ export const authService = {
 // Servicio de dashboard
 export const dashboardService = {
   async getStats() {
-    return apiService.get('/dashboard/stats');
+    return apiService.get('/api/dashboard/stats');
   },
 
   async getRecentReservas() {
-    return apiService.get('/dashboard/recent-reservas');
+    return apiService.get('/api/dashboard/recent-reservas');
   },
 
   async getSystemHealth() {
-    return apiService.get('/dashboard/health');
+    return apiService.get('/api/dashboard/health');
   },
 };
 

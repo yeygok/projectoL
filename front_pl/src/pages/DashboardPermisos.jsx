@@ -45,8 +45,8 @@ const DashboardPermisos = () => {
   // Table columns configuration
   const columns = [
     {
-      id: 'permiso',
-      label: 'Permiso',
+      field: 'permiso',
+      headerName: 'Permiso',
       render: (item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
@@ -64,8 +64,8 @@ const DashboardPermisos = () => {
       )
     },
     {
-      id: 'descripcion',
-      label: 'Descripción',
+      field: 'descripcion',
+      headerName: 'Descripción',
       render: (item) => (
         <div style={{ maxWidth: 250 }}>
           <div style={{ 
@@ -81,8 +81,8 @@ const DashboardPermisos = () => {
       )
     },
     {
-      id: 'modulo',
-      label: 'Módulo',
+      field: 'modulo',
+      headerName: 'Módulo',
       render: (item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Chip
@@ -95,8 +95,8 @@ const DashboardPermisos = () => {
       )
     },
     {
-      id: 'categoria',
-      label: 'Categoría',
+      field: 'categoria',
+      headerName: 'Categoría',
       render: (item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Chip
@@ -113,7 +113,7 @@ const DashboardPermisos = () => {
   const formFields = [
     {
       name: 'nombre_permiso',
-      label: 'Nombre del Permiso',
+      headerName: 'Nombre del Permiso',
       type: 'text',
       required: true,
       placeholder: 'Ej: usuarios.create, productos.read, admin.full',
@@ -121,7 +121,7 @@ const DashboardPermisos = () => {
     },
     {
       name: 'descripcion_permiso',
-      label: 'Descripción',
+      headerName: 'Descripción',
       type: 'textarea',
       rows: 3,
       placeholder: 'Descripción detallada del permiso y sus alcances...',
@@ -129,33 +129,33 @@ const DashboardPermisos = () => {
     },
     {
       name: 'modulo',
-      label: 'Módulo',
+      headerName: 'Módulo',
       type: 'select',
       options: [
-        { value: 'usuarios', label: 'Usuarios' },
-        { value: 'productos', label: 'Productos' },
-        { value: 'servicios', label: 'Servicios' },
-        { value: 'clientes', label: 'Clientes' },
-        { value: 'agendamientos', label: 'Agendamientos' },
-        { value: 'roles', label: 'Roles' },
-        { value: 'permisos', label: 'Permisos' },
-        { value: 'reportes', label: 'Reportes' },
-        { value: 'configuracion', label: 'Configuración' },
-        { value: 'general', label: 'General' }
+        { value: 'usuarios', headerName: 'Usuarios' },
+        { value: 'productos', headerName: 'Productos' },
+        { value: 'servicios', headerName: 'Servicios' },
+        { value: 'clientes', headerName: 'Clientes' },
+        { value: 'agendamientos', headerName: 'Agendamientos' },
+        { value: 'roles', headerName: 'Roles' },
+        { value: 'permisos', headerName: 'Permisos' },
+        { value: 'reportes', headerName: 'Reportes' },
+        { value: 'configuracion', headerName: 'Configuración' },
+        { value: 'general', headerName: 'General' }
       ],
       gridProps: { xs: 12, md: 6 }
     },
     {
       name: 'accion',
-      label: 'Acción',
+      headerName: 'Acción',
       type: 'select',
       options: [
-        { value: 'create', label: 'Crear' },
-        { value: 'read', label: 'Leer' },
-        { value: 'update', label: 'Actualizar' },
-        { value: 'delete', label: 'Eliminar' },
-        { value: 'admin', label: 'Administrar' },
-        { value: 'full', label: 'Control Total' }
+        { value: 'create', headerName: 'Crear' },
+        { value: 'read', headerName: 'Leer' },
+        { value: 'update', headerName: 'Actualizar' },
+        { value: 'delete', headerName: 'Eliminar' },
+        { value: 'admin', headerName: 'Administrar' },
+        { value: 'full', headerName: 'Control Total' }
       ],
       gridProps: { xs: 12, md: 6 }
     }

@@ -44,8 +44,8 @@ const DashboardRoles = () => {
   // Table columns configuration
   const columns = [
     {
-      id: 'rol',
-      label: 'Rol',
+      field: 'rol',
+      headerName: 'Rol',
       render: (item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
@@ -63,8 +63,8 @@ const DashboardRoles = () => {
       )
     },
     {
-      id: 'descripcion',
-      label: 'Descripción',
+      field: 'descripcion',
+      headerName: 'Descripción',
       render: (item) => (
         <div style={{ maxWidth: 250 }}>
           <div style={{ 
@@ -80,8 +80,8 @@ const DashboardRoles = () => {
       )
     },
     {
-      id: 'estado',
-      label: 'Estado',
+      field: 'estado',
+      headerName: 'Estado',
       render: (item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Chip
@@ -93,8 +93,8 @@ const DashboardRoles = () => {
       )
     },
     {
-      id: 'categoria',
-      label: 'Categoría',
+      field: 'categoria',
+      headerName: 'Categoría',
       render: (item) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Chip
@@ -112,7 +112,7 @@ const DashboardRoles = () => {
   const formFields = [
     {
       name: 'nombre_rol',
-      label: 'Nombre del Rol',
+      headerName: 'Nombre del Rol',
       type: 'text',
       required: true,
       placeholder: 'Ej: admin, cliente, tecnico, soporte',
@@ -120,7 +120,7 @@ const DashboardRoles = () => {
     },
     {
       name: 'descripcion_rol',
-      label: 'Descripción',
+      headerName: 'Descripción',
       type: 'textarea',
       rows: 3,
       placeholder: 'Descripción detallada del rol y sus responsabilidades...',
@@ -128,12 +128,12 @@ const DashboardRoles = () => {
     },
     {
       name: 'activo',
-      label: 'Estado',
+      headerName: 'Estado',
       type: 'select',
       required: true,
       options: [
-        { value: true, label: 'Activo' },
-        { value: false, label: 'Inactivo' }
+        { value: true, headerName: 'Activo' },
+        { value: false, headerName: 'Inactivo' }
       ],
       gridProps: { xs: 12, md: 6 }
     }

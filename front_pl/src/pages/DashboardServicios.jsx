@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Avatar, Chip } from '@mui/material';
 import {
   CarRepair as ServiceIcon,
@@ -9,7 +9,7 @@ import {
 
 // Importar componentes reutilizables
 import { DataTable, FormDialog, PageHeader, NotificationProvider } from '../components/common';
-import { serviceService, tipoServicioService } from '../services';
+import { serviceService } from '../services';
 import { useCrud, useApi } from '../hooks';
 
 const DashboardServicios = () => {
@@ -18,7 +18,21 @@ const DashboardServicios = () => {
 
   // CRUD operations
   const crudOperations = useCrud(serviceService);
-  const { data: tiposServicio } = useApi(tipoServicioService.getAll);
+  
+  // Datos auxiliares - categorías de servicios
+  const { data: categorias } = useApi(() => 
+    fetch('http://localhost:3000/api/dashboard/categorias', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    }).then(r => r.json())
+  );
+
+  // Debug logs
+  useEffect(() => {
+    console.log('🔍 DEBUG SERVICIOS:');
+    console.log('Servicios data:', crudOperations.data);
+    console.log('Categorías data:', categorias);
+    console.log('Ejemplo de servicio:', crudOperations.data?.[0]);
+  }, [crudOperations.data, categorias]);
 
   // Utility function
   const formatDuration = (minutes) => {
@@ -31,81 +45,90 @@ const DashboardServicios = () => {
     return `${mins}m`;
   };
 
+  // Helper function to format price
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
+
   // Table columns configuration
   const columns = [
     {
-      id: 'servicio',
-      label: 'Servicio',
-      render: (item) => (
+      field: 'servicio',
+      headerName: 'Servicio',
+      render: (value, row) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Avatar sx={{ mr: 2, bgcolor: 'secondary.main' }}>
-            {item.nombre_servicio?.charAt(0).toUpperCase() || 'S'}
+            {row.nombre?.charAt(0).toUpperCase() || 'S'}
           </Avatar>
           <div>
             <div style={{ fontWeight: 600 }}>
-              {item.nombre_servicio}
+              {row.nombre}
             </div>
             <div style={{ fontSize: '0.75rem', color: 'text.secondary' }}>
-              ID: {item.id_servicio}
+              ID: {row.id}
             </div>
           </div>
         </div>
       )
     },
     {
-      id: 'tipo',
-      label: 'Tipo',
-      render: (item) => (
+      field: 'categoria',
+      headerName: 'Categoría',
+      render: (value, row) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <CategoryIcon sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
-          {item.tipo_servicio_nombre || 'No especificado'}
+          {row.categoria_nombre || 'No especificado'}
         </div>
       )
     },
     {
-      id: 'precio',
-      label: 'Precio',
-      render: (item) => (
+      field: 'precio',
+      headerName: 'Precio',
+      render: (value, row) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <PriceIcon sx={{ mr: 1, fontSize: 16, color: 'success.main' }} />
           <span style={{ fontWeight: 600, color: 'success.main' }}>
-            ${item.precio?.toLocaleString() || '0'}
+            {formatPrice(row.precio_base)}
           </span>
         </div>
       )
     },
     {
-      id: 'duracion',
-      label: 'Duración',
-      render: (item) => (
+      field: 'duracion',
+      headerName: 'Duración',
+      render: (value, row) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <DurationIcon sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
-          {formatDuration(item.duracion)}
+          {formatDuration(row.duracion_estimada)}
         </div>
       )
     },
     {
-      id: 'estado',
-      label: 'Estado',
-      render: (item) => (
+      field: 'estado',
+      headerName: 'Estado',
+      render: (value, row) => (
         <Chip
-          label={item.activo ? 'Activo' : 'Inactivo'}
-          color={item.activo ? 'success' : 'error'}
+          label={row.activo ? 'Activo' : 'Inactivo'}
+          color={row.activo ? 'success' : 'error'}
           size="small"
         />
       )
     },
     {
-      id: 'descripcion',
-      label: 'Descripción',
-      render: (item) => (
+      field: 'descripcion',
+      headerName: 'Descripción',
+      render: (value, row) => (
         <div style={{ 
           maxWidth: 200, 
           overflow: 'hidden', 
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap' 
         }}>
-          {item.descripcion || 'Sin descripción'}
+          {row.descripcion || 'Sin descripción'}
         </div>
       )
     }
@@ -114,116 +137,84 @@ const DashboardServicios = () => {
   // Form fields configuration
   const formFields = [
     {
-      name: 'nombre_servicio',
+      name: 'nombre',
       label: 'Nombre del Servicio',
       type: 'text',
       required: true,
-      gridProps: { xs: 12, md: 6 }
+      md: 6
     },
     {
-      name: 'id_tipo_servicio',
-      label: 'Tipo de Servicio',
+      name: 'categoria_id',
+      label: 'Categoría',
       type: 'select',
       required: true,
-      options: tiposServicio?.map(tipo => ({
-        value: tipo.id_tipo_servicio,
-        label: tipo.nombre_tipo_servicio
+      options: categorias?.map(categoria => ({
+        value: categoria.id,
+        label: categoria.nombre
       })) || [],
-      gridProps: { xs: 12, md: 6 }
+      md: 6
     },
     {
-      name: 'precio',
-      label: 'Precio (COP)',
+      name: 'precio_base',
+      label: 'Precio Base (COP)',
       type: 'number',
       required: true,
-      inputProps: { min: 0, step: 1000 },
-      gridProps: { xs: 12, md: 6 }
+      inputProps: { min: 1000, step: 1000 },
+      helperText: 'Precio en pesos colombianos',
+      md: 6
     },
     {
-      name: 'duracion',
-      label: 'Duración (minutos)',
+      name: 'duracion_estimada',
+      label: 'Duración Estimada (minutos)',
       type: 'number',
       required: true,
-      inputProps: { min: 1, step: 15 },
-      gridProps: { xs: 12, md: 6 }
+      inputProps: { min: 15, step: 15 },
+      helperText: 'Duración en minutos (ej: 60, 90, 120)',
+      md: 6
     },
     {
       name: 'descripcion',
       label: 'Descripción',
-      type: 'textarea',
-      required: true,
+      type: 'text',
+      multiline: true,
       rows: 3,
       placeholder: 'Descripción detallada del servicio...',
-      gridProps: { xs: 12 }
-    },
-    {
-      name: 'activo',
-      label: 'Estado',
-      type: 'select',
-      options: [
-        { value: true, label: 'Activo' },
-        { value: false, label: 'Inactivo' }
-      ],
-      gridProps: { xs: 12, md: 6 }
-    },
-    {
-      name: 'observaciones',
-      label: 'Observaciones',
-      type: 'textarea',
-      rows: 2,
-      placeholder: 'Observaciones adicionales sobre el servicio...',
-      gridProps: { xs: 12 }
+      md: 12
     }
   ];
 
   // Default form values
   const defaultValues = {
-    nombre_servicio: '',
-    descripcion: '',
-    precio: '',
-    duracion: '',
-    id_tipo_servicio: '',
-    activo: true,
-    observaciones: ''
+    nombre: '',
+    categoria_id: '',
+    precio_base: 30000,
+    duracion_estimada: 60,
+    descripcion: ''
   };
 
-  // Form validation
-  const validateForm = (data) => {
-    const errors = {};
-    
-    if (!data.nombre_servicio?.trim()) {
-      errors.nombre_servicio = 'El nombre del servicio es requerido';
-    }
-    
-    if (!data.descripcion?.trim()) {
-      errors.descripcion = 'La descripción es requerida';
-    }
-    
-    if (!data.precio || data.precio <= 0) {
-      errors.precio = 'El precio debe ser mayor que 0';
-    }
-    
-    if (!data.duracion) {
-      errors.duracion = 'La duración es requerida';
-    }
 
-    if (!data.id_tipo_servicio) {
-      errors.id_tipo_servicio = 'El tipo de servicio es requerido';
-    }
-
-    return errors;
-  };
 
   // Event handlers
   const handleEdit = (item) => {
-    setSelectedItem(item);
+    // Preparar los datos para el formulario - INCLUIR EL ID
+    const editData = {
+      id: item.id, // ¡IMPORTANTE! Incluir el ID para las operaciones UPDATE
+      nombre: item.nombre,
+      categoria_id: item.categoria_id,
+      precio_base: item.precio_base,
+      duracion_estimada: item.duracion_estimada,
+      descripcion: item.descripcion || ''
+    };
+    
+    console.log('Editando servicio:', editData); // Debug log
+    setSelectedItem(editData);
     setDialogOpen(true);
   };
 
   const handleDelete = async (item) => {
-    if (window.confirm(`¿Está seguro de eliminar el servicio "${item.nombre_servicio}"?`)) {
+    if (window.confirm(`¿Está seguro de eliminar el servicio "${item.nombre}"?`)) {
       try {
-        await crudOperations.remove(item.id_servicio);
+        await crudOperations.remove(item.id);
       } catch (error) {
         console.error('Error deleting servicio:', error);
       }
@@ -232,22 +223,27 @@ const DashboardServicios = () => {
 
   const handleSubmit = async (formData) => {
     try {
-      const dataToSubmit = {
+      // Asegurar que los campos numéricos sean números
+      const processedData = {
         ...formData,
-        precio: parseFloat(formData.precio),
-        duracion: parseInt(formData.duracion)
+        categoria_id: parseInt(formData.categoria_id),
+        precio_base: parseFloat(formData.precio_base),
+        duracion_estimada: parseInt(formData.duracion_estimada)
       };
 
+      console.log('Datos a enviar:', processedData);
+
       if (selectedItem) {
-        await crudOperations.update(selectedItem.id_servicio, dataToSubmit);
+        await crudOperations.update(selectedItem.id, processedData);
       } else {
-        await crudOperations.create(dataToSubmit);
+        await crudOperations.create(processedData);
       }
       setDialogOpen(false);
       setSelectedItem(null);
       return true;
     } catch (error) {
       console.error('Error saving servicio:', error);
+      alert(`Error al guardar: ${error.message || 'Error desconocido'}`);
       return false;
     }
   };
@@ -282,11 +278,13 @@ const DashboardServicios = () => {
           setSelectedItem(null);
         }}
         title={selectedItem ? 'Editar Servicio' : 'Nuevo Servicio'}
+        subtitle={selectedItem ? 'Modificar los datos del servicio' : 'Crear un nuevo servicio de limpieza'}
         fields={formFields}
-        defaultValues={selectedItem || defaultValues}
+        initialData={selectedItem || defaultValues}
         onSubmit={handleSubmit}
-        validate={validateForm}
         loading={crudOperations.loading}
+        maxWidth="lg"
+        fullWidth
       />
     </NotificationProvider>
   );
