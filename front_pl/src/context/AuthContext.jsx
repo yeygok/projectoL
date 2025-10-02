@@ -76,24 +76,40 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    // Limpiar todo el estado
     setUser(null);
     setToken('');
+    
+    // Limpiar localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    
+    // Asegurar que loading es false
     setLoading(false);
+    
+    // Llamar al servicio de logout en el backend (opcional pero recomendado)
+    try {
+      authService.logout();
+    } catch (error) {
+      console.warn('Error al notificar logout al servidor:', error);
+    }
   };
 
   const register = async (userData) => {
     setLoading(true);
     try {
-      const data = await authService.register(userData);
-      setLoading(false);
-      return { success: true, data };
+      // Registrar usuario
+      const response = await authService.register(userData);
+      
+      // Hacer login automático con las credenciales
+      const loginResult = await login(userData.email, userData.password);
+      
+      return loginResult;
     } catch (error) {
       setLoading(false);
       return { 
         success: false, 
-        message: error.message || 'Error al registrar usuario' 
+        message: error.response?.data?.error || error.message || 'Error al registrar usuario' 
       };
     }
   };

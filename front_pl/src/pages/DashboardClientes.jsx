@@ -1,41 +1,46 @@
 import React, { useState } from 'react';
-import { Avatar } from '@mui/material';
+import { Avatar, Chip } from '@mui/material';
 import {
   Person as PersonIcon,
   Phone as PhoneIcon,
   Email as EmailIcon,
   LocationOn as LocationIcon,
+  Badge as BadgeIcon,
 } from '@mui/icons-material';
 
 // Importar componentes reutilizables
 import { DataTable, FormDialog, PageHeader, NotificationProvider } from '../components/common';
-import { clienteService, tipoDocumentoService } from '../services';
-import { useCrud, useApi } from '../hooks';
+import { userService } from '../services';
+import { useCrud } from '../hooks';
 
 const DashboardClientes = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
-  // CRUD operations
-  const crudOperations = useCrud(clienteService);
-  const { data: tiposDocumento } = useApi(tipoDocumentoService.getAll);
+  // CRUD operations - Traer todos los usuarios y filtrar por rol cliente
+  const crudOperations = useCrud(userService);
+
+  // Filtrar solo usuarios con rol de cliente
+  const clientesData = crudOperations.data?.filter(
+    user => user.rol_nombre?.toLowerCase() === 'cliente' || user.rol_id === 2
+  ) || [];
 
   // Table columns configuration
   const columns = [
     {
       field: 'cliente',
       headerName: 'Cliente',
-      render: (item) => (
+      render: (value, row) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
-            {`${item.nombres?.charAt(0) || ''}${item.apellidos?.charAt(0) || ''}`.toUpperCase()}
+            {`${row.nombre?.charAt(0) || ''}${row.apellido?.charAt(0) || ''}`.toUpperCase()}
           </Avatar>
           <div>
             <div style={{ fontWeight: 600 }}>
-              {item.nombres} {item.apellidos}
+              {row.nombre} {row.apellido}
             </div>
             <div style={{ fontSize: '0.75rem', color: 'text.secondary' }}>
-              Cliente #{item.id_cliente}
+              ID: {row.id} • Cliente
             </div>
           </div>
         </div>
@@ -44,41 +49,42 @@ const DashboardClientes = () => {
     {
       field: 'contacto',
       headerName: 'Contacto',
-      render: (item) => (
+      render: (value, row) => (
         <div>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
             <EmailIcon sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
-            {item.email}
+            <span style={{ fontSize: '0.875rem' }}>{row.email}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <PhoneIcon sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
-            {item.telefono}
+            <span style={{ fontSize: '0.875rem' }}>{row.telefono || 'No especificado'}</span>
           </div>
         </div>
       )
     },
     {
-      field: 'documento',
-      headerName: 'Documento',
-      render: (item) => (
-        <div>
-          <div>{item.tipo_documento_nombre || 'N/A'}</div>
-          <div style={{ fontSize: '0.75rem', color: 'text.secondary' }}>
-            {item.numero_documento}
-          </div>
-        </div>
+      field: 'rol',
+      headerName: 'Rol',
+      render: (value, row) => (
+        <Chip
+          label="Cliente"
+          color="primary"
+          size="small"
+          variant="outlined"
+          icon={<PersonIcon />}
+        />
       )
     },
     {
-      field: 'ubicacion',
-      headerName: 'Ubicación',
-      render: (item) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <LocationIcon sx={{ mr: 1, fontSize: 16, color: 'text.secondary' }} />
-          <div style={{ maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {item.direccion || 'No especificada'}
-          </div>
-        </div>
+      field: 'estado',
+      headerName: 'Estado',
+      render: (value, row) => (
+        <Chip
+          label={row.activo ? 'Activo' : 'Inactivo'}
+          color={row.activo ? 'success' : 'default'}
+          size="small"
+          variant="outlined"
+        />
       )
     }
   ];
@@ -86,129 +92,95 @@ const DashboardClientes = () => {
   // Form fields configuration
   const formFields = [
     {
-      name: 'nombres',
-      label: 'Nombres',
+      name: 'nombre',
+      label: 'Nombre',
       type: 'text',
       required: true,
-      gridProps: { xs: 12, md: 6 }
+      md: 6,
+      validation: (value) => {
+        if (!value?.trim()) return 'El nombre es requerido';
+        return true;
+      }
     },
     {
-      name: 'apellidos',
-      label: 'Apellidos',
+      name: 'apellido',
+      label: 'Apellido',
       type: 'text',
       required: true,
-      gridProps: { xs: 12, md: 6 }
+      md: 6,
+      validation: (value) => {
+        if (!value?.trim()) return 'El apellido es requerido';
+        return true;
+      }
     },
     {
       name: 'email',
       label: 'Email',
       type: 'email',
       required: true,
-      gridProps: { xs: 12, md: 6 }
+      md: 6,
+      validation: (value) => {
+        if (!value?.trim()) return 'El email es requerido';
+        if (!/\S+@\S+\.\S+/.test(value)) return 'Email inválido';
+        return true;
+      }
     },
     {
       name: 'telefono',
       label: 'Teléfono',
       type: 'text',
       required: true,
-      gridProps: { xs: 12, md: 6 }
+      md: 6,
+      placeholder: '3001234567'
     },
     {
-      name: 'id_tipo_documento',
-      label: 'Tipo de Documento',
+      name: 'rol_id',
+      label: 'Rol',
       type: 'select',
       required: true,
-      options: tiposDocumento?.map(tipo => ({
-        value: tipo.id_tipo_documento,
-        label: tipo.nombre_tipo_documento
-      })) || [],
-      gridProps: { xs: 12, md: 6 }
-    },
-    {
-      name: 'numero_documento',
-      label: 'Número de Documento',
-      type: 'text',
-      required: true,
-      gridProps: { xs: 12, md: 6 }
-    },
-    {
-      name: 'direccion',
-      label: 'Dirección',
-      type: 'text',
-      gridProps: { xs: 12 }
-    },
-    {
-      name: 'fecha_nacimiento',
-      label: 'Fecha de Nacimiento',
-      type: 'date',
-      gridProps: { xs: 12, md: 6 }
-    },
-    {
-      name: 'genero',
-      label: 'Género',
-      type: 'select',
       options: [
-        { value: 'M', label: 'Masculino' },
-        { value: 'F', label: 'Femenino' },
-        { value: 'Otro', label: 'Otro' }
+        { value: 2, label: 'Cliente' }
       ],
-      gridProps: { xs: 12, md: 6 }
+      md: 6,
+      disabled: true, // Siempre será cliente
+      helperText: 'Los clientes siempre tienen rol de Cliente'
     },
     {
-      name: 'observaciones',
-      label: 'Observaciones',
-      type: 'textarea',
-      rows: 3,
-      placeholder: 'Observaciones adicionales sobre el cliente...',
-      gridProps: { xs: 12 }
-    }
+      name: 'activo',
+      label: 'Estado',
+      type: 'select',
+      required: true,
+      options: [
+        { value: 1, label: 'Activo' },
+        { value: 0, label: 'Inactivo' }
+      ],
+      md: 6
+    },
+    ...(selectedItem ? [] : [
+      {
+        name: 'password',
+        label: 'Contraseña',
+        type: 'password',
+        required: true,
+        md: 12,
+        validation: (value) => {
+          if (!value?.trim()) return 'La contraseña es requerida';
+          if (value.length < 6) return 'Mínimo 6 caracteres';
+          return true;
+        }
+      }
+    ])
   ];
 
   // Default form values
   const defaultValues = {
-    nombres: '',
-    apellidos: '',
+    nombre: '',
+    apellido: '',
     email: '',
     telefono: '',
-    id_tipo_documento: '',
-    numero_documento: '',
-    direccion: '',
-    fecha_nacimiento: '',
-    genero: '',
-    observaciones: ''
-  };
-
-  // Form validation
-  const validateForm = (data) => {
-    const errors = {};
-    
-    if (!data.nombres?.trim()) {
-      errors.nombres = 'Los nombres son requeridos';
-    }
-    
-    if (!data.apellidos?.trim()) {
-      errors.apellidos = 'Los apellidos son requeridos';
-    }
-    
-    if (!data.email?.trim()) {
-      errors.email = 'El email es requerido';
-    } else if (!/\S+@\S+\.\S+/.test(data.email)) {
-      errors.email = 'El email no tiene un formato válido';
-    }
-    
-    if (!data.telefono?.trim()) {
-      errors.telefono = 'El teléfono es requerido';
-    }
-
-    if (!data.id_tipo_documento) {
-      errors.id_tipo_documento = 'El tipo de documento es requerido';
-    }
-
-    if (!data.numero_documento?.trim()) {
-      errors.numero_documento = 'El número de documento es requerido';
-    }
-
-    return errors;
+    rol_id: 2, // Siempre cliente
+    activo: 1,
+    password: ''
   };
 
   // Event handlers
@@ -218,21 +190,37 @@ const DashboardClientes = () => {
   };
 
   const handleDelete = async (item) => {
-    if (window.confirm(`¿Está seguro de eliminar al cliente ${item.nombres} ${item.apellidos}?`)) {
-      try {
-        await crudOperations.remove(item.id_cliente);
-      } catch (error) {
-        console.error('Error deleting cliente:', error);
-      }
+    if (!window.confirm(
+      `¿Está seguro de eliminar al cliente ${item.nombre} ${item.apellido}?\n\n` +
+      `Esta acción no se puede deshacer.`
+    )) {
+      return;
+    }
+
+    try {
+      await crudOperations.remove(item.id);
+    } catch (error) {
+      console.error('Error deleting cliente:', error);
     }
   };
 
   const handleSubmit = async (formData) => {
     try {
+      // Asegurar que siempre tenga rol_id = 2 (cliente)
+      const clienteData = {
+        ...formData,
+        rol_id: 2
+      };
+
       if (selectedItem) {
-        await crudOperations.update(selectedItem.id_cliente, formData);
+        // No enviar password en edición si está vacío
+        const updateData = { ...clienteData };
+        if (!updateData.password) {
+          delete updateData.password;
+        }
+        await crudOperations.update(selectedItem.id, updateData);
       } else {
-        await crudOperations.create(formData);
+        await crudOperations.create(clienteData);
       }
       setDialogOpen(false);
       setSelectedItem(null);
@@ -247,7 +235,7 @@ const DashboardClientes = () => {
     <NotificationProvider>
       <PageHeader
         title="Clientes"
-        subtitle="Gestionar información de clientes del sistema"
+        subtitle={`Gestionar usuarios con rol de cliente (${clientesData.length} clientes)`}
         icon={<PersonIcon />}
         onAdd={() => setDialogOpen(true)}
         onRefresh={crudOperations.refetch}
@@ -256,7 +244,7 @@ const DashboardClientes = () => {
       />
 
       <DataTable
-        data={crudOperations.data}
+        data={clientesData}
         columns={columns}
         loading={crudOperations.loading}
         error={crudOperations.error}
@@ -274,9 +262,8 @@ const DashboardClientes = () => {
         }}
         title={selectedItem ? 'Editar Cliente' : 'Nuevo Cliente'}
         fields={formFields}
-        defaultValues={selectedItem || defaultValues}
+        initialData={selectedItem || defaultValues}
         onSubmit={handleSubmit}
-        validate={validateForm}
         loading={crudOperations.loading}
       />
     </NotificationProvider>

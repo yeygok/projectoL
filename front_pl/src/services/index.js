@@ -89,6 +89,18 @@ export const agendamientoService = {
   async updateStatus(id, status) {
     return apiService.patch(`/api/agendamiento/${id}/status`, { status });
   },
+
+  async checkDisponibilidad(fecha_servicio, tecnico_id = null, cliente_id) {
+    return apiService.get('/api/agendamiento/disponibilidad', {
+      fecha_servicio,
+      tecnico_id,
+      cliente_id,
+    });
+  },
+
+  async getByCliente(clienteId) {
+    return apiService.get(`/api/agendamiento/cliente/${clienteId}`);
+  },
 };
 
 // Servicio de clientes
@@ -227,6 +239,52 @@ export const tipoServicioService = {
 
   async delete(id) {
     return apiService.delete(`/api/tipos-servicio/${id}`);
+  },
+};
+
+// Servicio de categorías de servicio
+export const categoriaService = {
+  async getAll(params = {}) {
+    return apiService.get('/api/categorias-servicio', params);
+  },
+
+  async getById(id) {
+    return apiService.get(`/api/categorias-servicio/${id}`);
+  },
+
+  async create(data) {
+    return apiService.post('/api/categorias-servicio', data);
+  },
+
+  async update(id, data) {
+    return apiService.put(`/api/categorias-servicio/${id}`, data);
+  },
+
+  async delete(id) {
+    return apiService.delete(`/api/categorias-servicio/${id}`);
+  },
+};
+
+// Servicio de estados de reserva
+export const estadoReservaService = {
+  async getAll(params = {}) {
+    return apiService.get('/api/estados-reserva', params);
+  },
+
+  async getById(id) {
+    return apiService.get(`/api/estados-reserva/${id}`);
+  },
+
+  async create(data) {
+    return apiService.post('/api/estados-reserva', data);
+  },
+
+  async update(id, data) {
+    return apiService.put(`/api/estados-reserva/${id}`, data);
+  },
+
+  async delete(id) {
+    return apiService.delete(`/api/estados-reserva/${id}`);
   },
 };
 

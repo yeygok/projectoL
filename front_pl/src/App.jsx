@@ -5,12 +5,17 @@ import { CssBaseline } from '@mui/material';
 import theme from './theme/theme';
 import { AuthProvider, useAuth, ROLES } from './context/AuthContext';
 import { ProtectedRoute } from './components/common';
+import ClienteLayout from './components/ClienteLayout';
 
 // Páginas
 import Home from './pages/Home';
 import Login from './pages/Login';
+import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ClienteProfile from './pages/ClienteProfile';
+import Booking from './pages/Booking';
+import ClienteReservas from './pages/ClienteReservas';
+import ClienteDashboard from './pages/ClienteDashboard';
 
 // Componente para redireccionar según el rol (solo para usuarios autenticados)
 const DashboardRedirect = () => {
@@ -40,8 +45,9 @@ const AppRoutes = () => {
       {/* Página de inicio pública */}
       <Route path="/" element={<Home />} />
       
-      {/* Ruta pública - Login */}
+      {/* Rutas públicas - Login y Registro */}
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
       
       {/* Redirección automática al dashboard para usuarios autenticados */}
       <Route path="/app" element={<DashboardRedirect />} />
@@ -61,11 +67,14 @@ const AppRoutes = () => {
         path="/cliente/*" 
         element={
           <ProtectedRoute allowedRoles={[ROLES.CLIENTE]}>
-            <Routes>
-              <Route index element={<Navigate to="/cliente/perfil" replace />} />
-              <Route path="perfil" element={<ClienteProfile />} />
-              {/* Aquí agregaremos más rutas de cliente */}
-            </Routes>
+            <ClienteLayout>
+              <Routes>
+                <Route index element={<ClienteDashboard />} />
+                <Route path="perfil" element={<ClienteProfile />} />
+                <Route path="reservar" element={<Booking />} />
+                <Route path="reservas" element={<ClienteReservas />} />
+              </Routes>
+            </ClienteLayout>
           </ProtectedRoute>
         } 
       />

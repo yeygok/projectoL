@@ -6,8 +6,12 @@ const { authMiddleware } = require('../middlewares/authMiddleware');
 // Aplicar middleware de autenticación a todas las rutas
 router.use(authMiddleware);
 
+// Rutas de testing
+router.get('/test-email', agendamientoController.testEmail);
+
 // Rutas específicas primero (sin parámetros)
 router.get('/disponibilidad', agendamientoController.checkDisponibilidad);
+router.get('/cliente/:clienteId', agendamientoController.getReservasByCliente);
 
 // Rutas con parámetros después
 router.get('/:id/detalle', agendamientoController.getAgendamientoDetalle);

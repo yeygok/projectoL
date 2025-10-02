@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Grid,
@@ -17,6 +18,7 @@ import {
   Edit as EditIcon,
   Save as SaveIcon,
   Cancel as CancelIcon,
+  Event as EventIcon,
 } from '@mui/icons-material';
 
 import { Button, Input, Card } from '../components/common';
@@ -24,6 +26,7 @@ import { useAuth } from '../context/AuthContext';
 import { authService } from '../services';
 
 const ClienteProfile = () => {
+  const navigate = useNavigate();
   const { user, updateProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -206,8 +209,25 @@ const ClienteProfile = () => {
         <Chip 
           label={user?.rol?.nombre?.toUpperCase() || 'CLIENTE'} 
           color="primary" 
-          sx={{ textTransform: 'capitalize' }}
+          sx={{ textTransform: 'capitalize', mb: 2 }}
         />
+        
+        {/* Quick Actions */}
+        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mt: 3 }}>
+          <Button
+            variant="contained"
+            startIcon={<EventIcon />}
+            onClick={() => navigate('/cliente/reservar')}
+          >
+            Nueva Reserva
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => navigate('/cliente/reservas')}
+          >
+            Ver Mis Reservas
+          </Button>
+        </Box>
       </Box>
 
       {/* Messages */}

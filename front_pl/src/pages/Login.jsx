@@ -29,17 +29,35 @@ const Login = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [justLoggedIn, setJustLoggedIn] = useState(false);  // ✅ NUEVO
   
   const { login, loading, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Redireccionar si ya está autenticado
+  // Mostrar mensaje de éxito si viene del registro
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (location.state?.message) {
+      setSuccessMessage(location.state.message);
+      // Limpiar el mensaje después de mostrarlo
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
+  // Redireccionar solo si acaba de hacer login exitoso
+  useEffect(() => {
+    if (isAuthenticated && user && justLoggedIn) {
       const from = location.state?.from?.pathname;
+      const categoriaPreseleccionada = location.state?.categoriaPreseleccionada;
       
-      if (from) {
+      if (from && categoriaPreseleccionada) {
+        // Si viene con categoría pre-seleccionada, ir directo a reservar
+        navigate(from, { 
+          state: { categoriaPreseleccionada },
+          replace: true 
+        });
+      } else if (from) {
         navigate(from, { replace: true });
       } else {
         // Redireccionar según el rol
@@ -57,16 +75,18 @@ const Login = () => {
             navigate('/cliente', { replace: true });
         }
       }
+      setJustLoggedIn(false); // Reset flag
     }
-  }, [isAuthenticated, user, navigate, location]);
+  }, [isAuthenticated, user, justLoggedIn, navigate, location]);
 
   const handleInputChange = (field) => (event) => {
     setFormData(prev => ({
       ...prev,
       [field]: event.target.value
     }));
-    // Limpiar error al escribir
+    // Limpiar mensajes al escribir
     if (error) setError('');
+    if (successMessage) setSuccessMessage('');
   };
 
   const handleSubmit = async (e) => {
@@ -80,10 +100,12 @@ const Login = () => {
 
     const result = await login(formData.email, formData.password);
     
-    if (!result.success) {
+    if (result.success) {
+      // ✅ Marcar que acaba de hacer login exitoso
+      setJustLoggedIn(true);
+    } else {
       setError(result.message || 'Error de autenticación');
     }
-    // La redirección se maneja en el useEffect
   };
 
   const togglePasswordVisibility = () => {
@@ -184,6 +206,12 @@ const Login = () => {
               sx={{ mb: 3 }}
             />
 
+            {successMessage && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                {successMessage}
+              </Alert>
+            )}
+
             {error && (
               <Alert severity="error" sx={{ mb: 3 }}>
                 {error}
@@ -200,28 +228,30 @@ const Login = () => {
                 py: 1.5,
                 fontSize: '1.1rem',
                 textTransform: 'none',
-                mb: 3
+                mb: 2
               }}
             >
               {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
             </Button>
-          </Box>
 
-          {/* Info adicional */}
-          <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              🔐 <strong>Acceso por roles:</strong>
-            </Typography>
-            <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-              • <strong>Admin:</strong> Panel completo de administración
-            </Typography>
-            <Typography variant="caption" display="block">
-              • <strong>Cliente:</strong> Perfil personal y reservas
-            </Typography>
+            <Button
+              fullWidth
+              variant="outlined"
+              size="large"
+              onClick={() => navigate('/register', { state: location.state })}
+              sx={{ 
+                py: 1.5,
+                fontSize: '1.1rem',
+                textTransform: 'none',
+                mb: 3
+              }}
+            >
+              Crear Cuenta Nueva
+            </Button>
           </Box>
 
           <Typography variant="body2" color="text.secondary" sx={{ mt: 3 }}>
-            ¿No tienes cuenta? Los clientes se registran automáticamente al agendar su primer servicio.
+            🎯 <strong>Nuevo usuario?</strong> Crea tu cuenta para acceder a nuestros servicios de lavado con vapor
           </Typography>
         </Paper>
       </Container>

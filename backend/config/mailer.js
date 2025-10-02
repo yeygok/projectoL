@@ -11,13 +11,15 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Verificar configuración del transporter - COMENTADO TEMPORALMENTE
-// transporter.verify(function (error, success) {
-//   if (error) {
-//     console.log('❌ Error en configuración de correo:', error);
-//   } else {
-//     console.log('✅ Servidor de correo listo para enviar mensajes');
-//   }
-// });
+// Verificar configuración del transporter
+transporter.verify(function (error, success) {
+  if (error) {
+    console.log('❌ Error en configuración de correo:', error.message);
+    console.log('⚠️ Verifica que las credenciales en .env sean correctas');
+  } else {
+    console.log('✅ Servidor de correo listo para enviar mensajes');
+    console.log(`📧 Enviando desde: ${process.env.EMAIL_USER}`);
+  }
+});
 
 module.exports = transporter;

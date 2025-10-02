@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useLocation, Navigate, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import {
   Box,
   Drawer,
@@ -35,6 +36,9 @@ import {
   Notifications as NotificationsIcon,
   Logout as LogoutIcon,
   ChevronLeft as ChevronLeftIcon,
+  Category as CategoryIcon,
+  Style as StyleIcon,
+  Timeline as TimelineIcon,
 } from '@mui/icons-material';
 
 // Importar componentes del dashboard
@@ -48,6 +52,10 @@ import DashboardRoles from './DashboardRoles';
 import DashboardPermisos from './DashboardPermisos';
 import DashboardTipos from './DashboardTipos';
 import DashboardPerfil from './DashboardPerfil';
+// Nuevas páginas - Fase 1
+import DashboardCategorias from './DashboardCategorias';
+import DashboardTiposServicio from './DashboardTiposServicio';
+import DashboardEstadosReserva from './DashboardEstadosReserva';
 
 const drawerWidth = 280;
 
@@ -56,6 +64,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { logout } = useAuth();
   
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -103,6 +112,24 @@ const Dashboard = () => {
       description: 'Gestionar servicios'
     },
     { 
+      path: '/dashboard/categorias', 
+      name: 'Categorías', 
+      icon: <CategoryIcon />,
+      description: 'Categorías de servicios'
+    },
+    { 
+      path: '/dashboard/tipos-servicio', 
+      name: 'Tipos de Servicio', 
+      icon: <StyleIcon />,
+      description: 'Tipos y multiplicadores'
+    },
+    { 
+      path: '/dashboard/estados-reserva', 
+      name: 'Estados', 
+      icon: <TimelineIcon />,
+      description: 'Estados de reserva'
+    },
+    { 
       path: '/dashboard/usuarios', 
       name: 'Usuarios', 
       icon: <PersonIcon />,
@@ -141,9 +168,9 @@ const Dashboard = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/login');
+    logout();
+    handleProfileMenuClose();
+    navigate('/');
   };
 
   // Verificar si el usuario está autenticado
@@ -338,6 +365,10 @@ const Dashboard = () => {
           <Route path="permisos" element={<DashboardPermisos />} />
           <Route path="tipos" element={<DashboardTipos />} />
           <Route path="perfil" element={<DashboardPerfil />} />
+          {/* Nuevas rutas - Fase 1 */}
+          <Route path="categorias" element={<DashboardCategorias />} />
+          <Route path="tipos-servicio" element={<DashboardTiposServicio />} />
+          <Route path="estados-reserva" element={<DashboardEstadosReserva />} />
         </Routes>
       </Box>
 

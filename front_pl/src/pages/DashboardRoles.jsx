@@ -46,17 +46,17 @@ const DashboardRoles = () => {
     {
       field: 'rol',
       headerName: 'Rol',
-      render: (item) => (
+      render: (value, row) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }}>
-            {getRoleIcon(item.nombre_rol)}
+          <Avatar sx={{ mr: 2, bgcolor: getRoleColor(row.nombre), color: 'white' }}>
+            {getRoleIcon(row.nombre)}
           </Avatar>
           <div>
-            <div style={{ fontWeight: 600 }}>
-              {item.nombre_rol}
+            <div style={{ fontWeight: 600, textTransform: 'capitalize' }}>
+              {row.nombre}
             </div>
             <div style={{ fontSize: '0.75rem', color: 'text.secondary' }}>
-              ID: {item.id_rol}
+              ID: {row.id}
             </div>
           </div>
         </div>
@@ -65,45 +65,49 @@ const DashboardRoles = () => {
     {
       field: 'descripcion',
       headerName: 'Descripción',
-      render: (item) => (
-        <div style={{ maxWidth: 250 }}>
+      render: (value, row) => (
+        <div style={{ maxWidth: 300 }}>
           <div style={{ 
             overflow: 'hidden', 
             textOverflow: 'ellipsis',
             display: '-webkit-box',
             WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical'
+            WebkitBoxOrient: 'vertical',
+            fontSize: '0.875rem'
           }}>
-            {item.descripcion_rol || 'Sin descripción'}
+            {row.descripcion || 'Sin descripción'}
           </div>
         </div>
       )
     },
     {
-      field: 'estado',
-      headerName: 'Estado',
-      render: (item) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <Chip
-            label={item.activo ? 'Activo' : 'Inactivo'}
-            color={item.activo ? 'success' : 'error'}
-            size="small"
-          />
+      field: 'usuarios',
+      headerName: 'Usuarios',
+      render: (value, row) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <GroupIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+          <div>
+            <div style={{ fontWeight: 600 }}>
+              {row.usuarios_con_rol || 0}
+            </div>
+            <div style={{ fontSize: '0.7rem', color: 'text.secondary' }}>
+              usuarios
+            </div>
+          </div>
         </div>
       )
     },
     {
       field: 'categoria',
-      headerName: 'Categoría',
-      render: (item) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <Chip
-            label={item.nombre_rol}
-            color={getRoleColor(item.nombre_rol)}
-            size="small"
-            variant="outlined"
-          />
-        </div>
+      headerName: 'Tipo',
+      render: (value, row) => (
+        <Chip
+          label={row.nombre}
+          color={getRoleColor(row.nombre)}
+          size="small"
+          variant="outlined"
+          sx={{ textTransform: 'capitalize', fontWeight: 600 }}
+        />
       )
     }
   ];
@@ -111,54 +115,32 @@ const DashboardRoles = () => {
   // Form fields configuration
   const formFields = [
     {
-      name: 'nombre_rol',
-      headerName: 'Nombre del Rol',
+      name: 'nombre',
+      label: 'Nombre del Rol',
       type: 'text',
       required: true,
       placeholder: 'Ej: admin, cliente, tecnico, soporte',
-      gridProps: { xs: 12, md: 6 }
+      md: 12,
+      validation: (value) => {
+        if (!value?.trim()) return 'El nombre del rol es requerido';
+        if (value.length > 50) return 'El nombre no puede exceder 50 caracteres';
+        return true;
+      }
     },
     {
-      name: 'descripcion_rol',
-      headerName: 'Descripción',
+      name: 'descripcion',
+      label: 'Descripción',
       type: 'textarea',
       rows: 3,
       placeholder: 'Descripción detallada del rol y sus responsabilidades...',
-      gridProps: { xs: 12 }
-    },
-    {
-      name: 'activo',
-      headerName: 'Estado',
-      type: 'select',
-      required: true,
-      options: [
-        { value: true, headerName: 'Activo' },
-        { value: false, headerName: 'Inactivo' }
-      ],
-      gridProps: { xs: 12, md: 6 }
+      md: 12
     }
   ];
 
   // Default form values
   const defaultValues = {
-    nombre_rol: '',
-    descripcion_rol: '',
-    activo: true
-  };
-
-  // Form validation
-  const validateForm = (data) => {
-    const errors = {};
-    
-    if (!data.nombre_rol?.trim()) {
-      errors.nombre_rol = 'El nombre del rol es requerido';
-    }
-
-    if (data.activo === undefined || data.activo === '') {
-      errors.activo = 'El estado es requerido';
-    }
-
-    return errors;
+    nombre: '',
+    descripcion: ''
   };
 
   // Event handlers
@@ -168,27 +150,39 @@ const DashboardRoles = () => {
   };
 
   const handleDelete = async (item) => {
-    if (window.confirm(`¿Está seguro de eliminar el rol "${item.nombre_rol}"?`)) {
-      try {
-        await crudOperations.remove(item.id_rol);
-      } catch (error) {
-        console.error('Error deleting rol:', error);
+    // Roles críticos que no se pueden eliminar
+    const rolesCriticos = ['admin', 'cliente', 'tecnico'];
+    if (rolesCriticos.includes(item.nombre?.toLowerCase())) {
+      alert(`⚠️ El rol "${item.nombre}" es crítico y no puede ser eliminado.`);
+      return;
+    }
+
+    if (item.usuarios_con_rol > 0) {
+      if (!window.confirm(
+        `⚠️ Este rol tiene ${item.usuarios_con_rol} usuario(s) asignado(s).\n\n` +
+        `¿Está seguro de eliminarlo? Los usuarios quedarán sin rol.`
+      )) {
+        return;
       }
+    } else {
+      if (!window.confirm(`¿Está seguro de eliminar el rol "${item.nombre}"?`)) {
+        return;
+      }
+    }
+
+    try {
+      await crudOperations.remove(item.id);
+    } catch (error) {
+      console.error('Error deleting rol:', error);
     }
   };
 
   const handleSubmit = async (formData) => {
     try {
-      // Convert string values to appropriate types
-      const processedData = {
-        ...formData,
-        activo: formData.activo === true || formData.activo === 'true'
-      };
-
       if (selectedItem) {
-        await crudOperations.update(selectedItem.id_rol, processedData);
+        await crudOperations.update(selectedItem.id, formData);
       } else {
-        await crudOperations.create(processedData);
+        await crudOperations.create(formData);
       }
       setDialogOpen(false);
       setSelectedItem(null);
@@ -230,9 +224,8 @@ const DashboardRoles = () => {
         }}
         title={selectedItem ? 'Editar Rol' : 'Nuevo Rol'}
         fields={formFields}
-        defaultValues={selectedItem || defaultValues}
+        initialData={selectedItem || defaultValues}
         onSubmit={handleSubmit}
-        validate={validateForm}
         loading={crudOperations.loading}
       />
     </NotificationProvider>

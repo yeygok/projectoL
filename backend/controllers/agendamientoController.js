@@ -80,6 +80,8 @@ const createAgendamiento = async (req, res) => {
     vehiculo_id, 
     servicio_tipo_id, 
     ubicacion_servicio_id, 
+    ubicacion, // Nuevo: datos de ubicación si no existe el ID
+    vehiculo, // Nuevo: datos de vehículo si no existe el ID
     fecha_servicio, 
     precio_total, 
     estado_id = 1, // Por defecto: 'pendiente'
@@ -87,10 +89,17 @@ const createAgendamiento = async (req, res) => {
   } = req.body;
   
   // Validación de campos básicos según la estructura real
-  if (!cliente_id || !servicio_tipo_id || !ubicacion_servicio_id || !fecha_servicio || !precio_total) {
+  if (!cliente_id || !servicio_tipo_id || !fecha_servicio || !precio_total) {
     return res.status(400).json({ 
-      error: 'Campos requeridos: cliente_id, servicio_tipo_id, ubicacion_servicio_id, fecha_servicio, precio_total',
-      received: { cliente_id, servicio_tipo_id, ubicacion_servicio_id, fecha_servicio, precio_total }
+      error: 'Campos requeridos: cliente_id, servicio_tipo_id, fecha_servicio, precio_total',
+      received: { cliente_id, servicio_tipo_id, fecha_servicio, precio_total }
+    });
+  }
+  
+  // Si no hay ubicacion_servicio_id, debe haber datos de ubicacion
+  if (!ubicacion_servicio_id && !ubicacion) {
+    return res.status(400).json({ 
+      error: 'Debe proporcionar ubicacion_servicio_id o datos de ubicacion (direccion, barrio, localidad)',
     });
   }
 
@@ -99,6 +108,9 @@ const createAgendamiento = async (req, res) => {
   if (isNaN(fechaServicio.getTime())) {
     return res.status(400).json({ error: 'Formato de fecha_servicio inválido. Use formato ISO: YYYY-MM-DDTHH:MM:SS' });
   }
+  
+  // Convertir a formato MySQL: YYYY-MM-DD HH:MM:SS
+  const mysqlFechaServicio = fechaServicio.toISOString().slice(0, 19).replace('T', ' ');
 
   const connection = await pool.getConnection();
   
@@ -145,17 +157,60 @@ const createAgendamiento = async (req, res) => {
       throw new Error(`Tipo de servicio con ID ${servicio_tipo_id} no encontrado`);
     }
     
-    // Validar que la ubicación exista
-    const [ubicacionRows] = await connection.query('SELECT id, direccion, barrio, localidad, zona FROM Ubicaciones WHERE id = ? AND activa = 1', [ubicacion_servicio_id]);
-    if (ubicacionRows.length === 0) {
-      throw new Error(`Ubicación con ID ${ubicacion_servicio_id} no encontrada o inactiva`);
+    // Crear o validar ubicación
+    let ubicacionId = ubicacion_servicio_id;
+    let ubicacionData = null;
+    
+    if (!ubicacionId && ubicacion) {
+      // Crear nueva ubicación
+      const [ubicacionResult] = await connection.query(
+        'INSERT INTO Ubicaciones (direccion, barrio, localidad, zona, activa) VALUES (?, ?, ?, ?, 1)',
+        [ubicacion.direccion, ubicacion.barrio, ubicacion.localidad, ubicacion.zona || 'norte']
+      );
+      ubicacionId = ubicacionResult.insertId;
+      console.log(`✅ Nueva ubicación creada con ID: ${ubicacionId}`);
+      
+      // Obtener los datos de la ubicación recién creada
+      const [ubicacionRows] = await connection.query(
+        'SELECT id, direccion, barrio, localidad, zona FROM Ubicaciones WHERE id = ?', 
+        [ubicacionId]
+      );
+      ubicacionData = ubicacionRows[0];
+    } else if (ubicacionId) {
+      // Validar que la ubicación exista
+      const [ubicacionRows] = await connection.query('SELECT id, direccion, barrio, localidad, zona FROM Ubicaciones WHERE id = ? AND activa = 1', [ubicacionId]);
+      if (ubicacionRows.length === 0) {
+        throw new Error(`Ubicación con ID ${ubicacionId} no encontrada o inactiva`);
+      }
+      ubicacionData = ubicacionRows[0];
     }
     
-    // Validar que el vehículo exista si se especifica
-    if (vehiculo_id) {
-      const [vehiculoRows] = await connection.query('SELECT id, modelo, placa FROM Vehiculos WHERE id = ? AND activo = 1', [vehiculo_id]);
+    // Crear o validar vehículo (si aplica)
+    let vehiculoId = vehiculo_id;
+    if (!vehiculoId && vehiculo && vehiculo.modelo && vehiculo.placa) {
+      // Verificar si ya existe un vehículo con esa placa
+      const [vehiculoExistente] = await connection.query(
+        'SELECT id FROM Vehiculos WHERE placa = ? AND activo = 1',
+        [vehiculo.placa]
+      );
+      
+      if (vehiculoExistente.length > 0) {
+        vehiculoId = vehiculoExistente[0].id;
+        console.log(`✅ Vehículo existente encontrado con ID: ${vehiculoId}`);
+      } else {
+        // Crear nuevo vehículo
+        const [vehiculoResult] = await connection.query(
+          'INSERT INTO Vehiculos (modelo, placa, cliente_id, activo) VALUES (?, ?, ?, 1)',
+          [vehiculo.modelo, vehiculo.placa, cliente_id]
+        );
+        vehiculoId = vehiculoResult.insertId;
+        console.log(`✅ Nuevo vehículo creado con ID: ${vehiculoId}`);
+      }
+    } else if (vehiculoId) {
+      // Validar que el vehículo exista
+      const [vehiculoRows] = await connection.query('SELECT id, modelo, placa FROM Vehiculos WHERE id = ? AND activo = 1', [vehiculoId]);
       if (vehiculoRows.length === 0) {
-        throw new Error(`Vehículo con ID ${vehiculo_id} no encontrado o inactivo`);
+        throw new Error(`Vehículo con ID ${vehiculoId} no encontrado o inactivo`);
       }
     }
     
@@ -188,10 +243,10 @@ const createAgendamiento = async (req, res) => {
       [
         cliente_id, 
         tecnico_id || null, 
-        vehiculo_id || null, 
+        vehiculoId || null, 
         servicio_tipo_id, 
-        ubicacion_servicio_id, 
-        fecha_servicio, 
+        ubicacionId, 
+        mysqlFechaServicio, // ✅ Usar formato MySQL
         precio_total, 
         estado_id, 
         observaciones || null
@@ -205,7 +260,6 @@ const createAgendamiento = async (req, res) => {
     // Preparar datos para emails
     const clienteData = clienteRows[0];
     const tipoServicioData = tipoServicioRows[0];
-    const ubicacionData = ubicacionRows[0];
     
     let tecnicoData = null;
     if (tecnico_id) {
@@ -222,7 +276,7 @@ const createAgendamiento = async (req, res) => {
         cliente: clienteData,
         reserva: {
           id: reservaId,
-          fecha_servicio: fecha_servicio,
+          fecha_servicio: mysqlFechaServicio, // ✅ Usar formato MySQL
           precio_total: precio_total,
           observaciones: observaciones,
           estado: 'pendiente'
@@ -262,7 +316,7 @@ const createAgendamiento = async (req, res) => {
       id: reservaId,
       mensaje: 'Reserva creada exitosamente y emails enviados',
       cliente: `${clienteData.nombre} ${clienteData.apellido}`,
-      fecha_servicio: fecha_servicio,
+      fecha_servicio: mysqlFechaServicio, // ✅ Usar formato MySQL
       precio_total: precio_total,
       tipo_servicio: tipoServicioData.nombre,
       ubicacion: `${ubicacionData.direccion}, ${ubicacionData.barrio}`,
@@ -721,6 +775,64 @@ const testEmail = async (req, res) => {
   }
 };
 
+// Endpoint para obtener reservas de un cliente específico
+const getReservasByCliente = async (req, res) => {
+  const { clienteId } = req.params;
+  
+  try {
+    // Verificar que el cliente exista
+    const [clienteExists] = await pool.query(
+      'SELECT id FROM Usuarios WHERE id = ? AND rol_id = (SELECT id FROM Roles WHERE nombre = "cliente")',
+      [clienteId]
+    );
+    
+    if (clienteExists.length === 0) {
+      return res.status(404).json({ error: 'Cliente no encontrado' });
+    }
+    
+    // Obtener todas las reservas del cliente con información completa
+    const [reservas] = await pool.query(`
+      SELECT 
+        r.*,
+        uc.nombre as cliente_nombre,
+        uc.apellido as cliente_apellido,
+        uc.email as cliente_email,
+        uc.telefono as cliente_telefono,
+        ut.nombre as tecnico_nombre,
+        ut.apellido as tecnico_apellido,
+        ut.telefono as tecnico_telefono,
+        er.estado as estado_nombre,
+        er.descripcion as estado_descripcion,
+        ts.nombre as tipo_servicio,
+        ts.descripcion as tipo_servicio_descripcion,
+        ts.multiplicador_precio,
+        v.modelo as vehiculo_modelo,
+        v.placa as vehiculo_placa,
+        ub.direccion as ubicacion_direccion,
+        ub.barrio as ubicacion_barrio,
+        ub.localidad as ubicacion_localidad,
+        ub.zona as ubicacion_zona
+      FROM Reservas r
+      LEFT JOIN Usuarios uc ON r.cliente_id = uc.id
+      LEFT JOIN Usuarios ut ON r.tecnico_id = ut.id
+      LEFT JOIN EstadosReserva er ON r.estado_id = er.id
+      LEFT JOIN TiposServicio ts ON r.servicio_tipo_id = ts.id
+      LEFT JOIN Vehiculos v ON r.vehiculo_id = v.id
+      LEFT JOIN Ubicaciones ub ON r.ubicacion_servicio_id = ub.id
+      WHERE r.cliente_id = ?
+      ORDER BY r.fecha_servicio DESC, r.created_at DESC
+    `, [clienteId]);
+    
+    console.log(`✅ ${reservas.length} reservas encontradas para cliente ${clienteId}`);
+    res.json(reservas);
+    
+  } catch (error) {
+    console.error('Error al obtener reservas del cliente:', error.message);
+    console.error('Stack trace:', error.stack);
+    res.status(500).json({ error: 'Error al obtener reservas del cliente' });
+  }
+};
+
 module.exports = {
   getAllAgendamientos,
   getAgendamientoById,
@@ -729,5 +841,6 @@ module.exports = {
   deleteAgendamiento,
   checkDisponibilidad,
   getAgendamientoDetalle,
+  getReservasByCliente,
   testEmail
 };

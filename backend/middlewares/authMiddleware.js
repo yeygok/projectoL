@@ -105,8 +105,35 @@ const checkRole = (requiredRoles) => {
   };
 };
 
+/**
+ * Middleware para verificar si el usuario es administrador
+ * Simplificación de checkRole(['admin'])
+ */
+const isAdmin = (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'No autenticado' });
+    }
+    
+    if (req.user.rol_nombre !== 'admin') {
+      return res.status(403).json({ 
+        error: 'Acceso denegado. Solo administradores pueden realizar esta acción.',
+        required_role: 'admin',
+        user_role: req.user.rol_nombre
+      });
+    }
+    
+    next();
+    
+  } catch (error) {
+    console.error('❌ Error en middleware isAdmin:', error);
+    res.status(500).json({ error: 'Error en verificación de permisos' });
+  }
+};
+
 module.exports = {
   authMiddleware,
   checkPermission,
   checkRole,
+  isAdmin,
 };

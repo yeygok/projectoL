@@ -26,14 +26,15 @@ class ApiService {
   }
 
   // Obtener headers con token de autenticación
-  getHeaders(customHeaders = {}) {
+  getHeaders(customHeaders = {}, skipAuth = false) {
     const token = localStorage.getItem('token');
     const headers = {
       ...this.defaultHeaders,
       ...customHeaders,
     };
 
-    if (token) {
+    // Solo agregar token si no se especifica skipAuth
+    if (token && !skipAuth) {
       headers.Authorization = `Bearer ${token}`;
     }
 
@@ -45,9 +46,10 @@ class ApiService {
     const url = `${this.baseURL}${endpoint}`;
     const config = {
       timeout: this.timeout,
-      headers: this.getHeaders(options.headers),
+      headers: this.getHeaders(options.headers, options.skipAuth),
       ...options,
     };
+
 
     try {
       // Crear AbortController para timeout
@@ -115,16 +117,17 @@ class ApiService {
   }
 
   // Métodos HTTP
-  async get(endpoint, params = {}) {
+  async get(endpoint, params = {}, skipAuth = false) {
     const queryString = new URLSearchParams(params).toString();
     const url = queryString ? `${endpoint}?${queryString}` : endpoint;
-    return this.request(url, { method: 'GET' });
+    return this.request(url, { method: 'GET', skipAuth });
   }
 
-  async post(endpoint, data = {}) {
+  async post(endpoint, data = {}, skipAuth = false) {
     return this.request(endpoint, {
       method: 'POST',
       body: JSON.stringify(data),
+      skipAuth,
     });
   }
 
@@ -167,6 +170,105 @@ class ApiService {
 
 // Instancia global del servicio API
 const apiService = new ApiService();
+
+// ============================================
+// SERVICIOS ESPECÍFICOS
+// ============================================
+
+// Servicio de Categorías
+export const categoriaService = {
+  getAll: async (skipAuth = true) => {
+    const response = await apiService.get('/api/categorias-servicio', {}, skipAuth);
+    // Manejar diferentes estructuras de respuesta
+    return Array.isArray(response) ? response : (response.data || response);
+  },
+  
+  getById: async (id, skipAuth = true) => {
+    const response = await apiService.get(`/api/categorias-servicio/${id}`, {}, skipAuth);
+    return response.data || response;
+  },
+  
+  create: async (data) => {
+    const response = await apiService.post('/api/categorias-servicio', data);
+    return response.categoria || response.data || response;
+  },
+  
+  update: async (id, data) => {
+    const response = await apiService.put(`/api/categorias-servicio/${id}`, data);
+    return response.data || response;
+  },
+  
+  delete: async (id) => {
+    const response = await apiService.delete(`/api/categorias-servicio/${id}`);
+    return response.data || response;
+  },
+  
+  reactivate: async (id) => {
+    const response = await apiService.put(`/api/categorias-servicio/${id}/reactivar`);
+    return response.data || response;
+  }
+};
+
+// Servicio de Tipos de Servicio
+export const tipoServicioService = {
+  getAll: async (skipAuth = true) => {
+    const response = await apiService.get('/api/tipos-servicio', {}, skipAuth);
+    return Array.isArray(response) ? response : (response.data || response);
+  },
+  
+  getById: async (id, skipAuth = true) => {
+    const response = await apiService.get(`/api/tipos-servicio/${id}`, {}, skipAuth);
+    return response.data || response;
+  },
+  
+  create: async (data) => {
+    const response = await apiService.post('/api/tipos-servicio', data);
+    return response.tipo || response.data || response;
+  },
+  
+  update: async (id, data) => {
+    const response = await apiService.put(`/api/tipos-servicio/${id}`, data);
+    return response.data || response;
+  },
+  
+  delete: async (id) => {
+    const response = await apiService.delete(`/api/tipos-servicio/${id}`);
+    return response.data || response;
+  }
+};
+
+// Servicio de Estados de Reserva
+export const estadoReservaService = {
+  getAll: async () => {
+    const response = await apiService.get('/api/estados-reserva');
+    return Array.isArray(response) ? response : (response.data || response);
+  },
+  
+  getById: async (id) => {
+    const response = await apiService.get(`/api/estados-reserva/${id}`);
+    return response.data || response;
+  },
+  
+  getEstadisticas: async () => {
+    const response = await apiService.get('/api/estados-reserva/stats/resumen');
+    return Array.isArray(response) ? response : (response.data || response);
+  },
+  
+  create: async (data) => {
+    const response = await apiService.post('/api/estados-reserva', data);
+    return response.estado || response.data || response;
+  },
+  
+  update: async (id, data) => {
+    const response = await apiService.put(`/api/estados-reserva/${id}`, data);
+    return response.data || response;
+  },
+  
+  delete: async (id) => {
+    const response = await apiService.delete(`/api/estados-reserva/${id}`);
+    return response.data || response;
+  }
+};
 
 export default apiService;
 export { ApiError };

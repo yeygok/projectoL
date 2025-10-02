@@ -26,6 +26,8 @@ const rolRoutes = require('./rol');
 const permisoRoutes = require('./permiso');
 const rolPermisoRoutes = require('./rol_permiso');
 const tipoServicioRoutes = require('./tipo_servicio');
+const categoriaRoutes = require('./categoria');
+const estadoReservaRoutes = require('./estado_reserva');
 
 // Configurar rutas
 router.use('/auth', authRoutes);
@@ -38,5 +40,8 @@ router.use('/roles', rolRoutes);
 router.use('/permisos', permisoRoutes);
 router.use('/rol-permisos', rolPermisoRoutes);
 router.use('/tipos-servicio', tipoServicioRoutes);
+router.use('/categorias', categoriaRoutes);
+router.use('/categorias-servicio', categoriaRoutes); // Alias para compatibilidad con frontend
+router.use('/estados-reserva', estadoReservaRoutes);
 
 module.exports = router;
