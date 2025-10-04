@@ -1,218 +1,157 @@
-# 🚀 **GUÍA DE INICIO RÁPIDO - MEGA MALVADO**
+# 🚀 QUICK START - MEGA LAVADO
 
-## ⚡ **INICIAR EL SISTEMA (3 PASOS)**
+## Iniciar el Proyecto
 
-### **1. Iniciar Backend**
+### 1. Backend
 ```bash
 cd backend
-npm install  # Solo la primera vez
 npm start
+# API: http://localhost:3000
 ```
-✅ **Resultado:** Servidor corriendo en `http://localhost:3000`
 
-### **2. Iniciar Frontend**
+### 2. Frontend
 ```bash
 cd front_pl
-npm install  # Solo la primera vez
 npm run dev
+# App: http://localhost:5173
 ```
-✅ **Resultado:** Aplicación en `http://localhost:5173`
 
-### **3. Verificar Base de Datos**
-```bash
-mysql -u root -p
-USE LavadoVaporBogotaDB;
-SELECT COUNT(*) FROM Usuarios;  # Debe mostrar 8
+### 3. Base de Datos
 ```
-✅ **Resultado:** Base de datos conectada y con datos
+Host: localhost:3306
+Database: LavadoVaporBogotaDB
+User: root
+```
 
----
+## Usuarios de Prueba
 
-## 🔐 **ACCEDER AL SISTEMA**
+### Admin
+```
+Email: admin@megalavado.com
+Password: admin123
+Rol: admin (id=1)
+Acceso: /dashboard
+```
 
-### **Credenciales de Prueba:**
-- **Admin:** admin@mega-malvado.com / admin123
-- **Cliente:** cliente1@email.com / cliente123
-- **Técnico:** tecnico1@email.com / tecnico123
+### Cliente
+```
+Email: cliente@test.com
+Password: test123
+Rol: cliente (id=2)
+Acceso: /cliente
+```
 
-### **URLs Importantes:**
-- **Frontend:** http://localhost:5173
-- **Backend API:** http://localhost:3000
-- **Postman Collection:** Importar `postman_collection.json`
+## Estructura del Proyecto
 
----
+```
+project L/
+├── backend/               # API Node.js + Express
+│   ├── index.js          # Servidor principal (puerto 3000)
+│   ├── config/           # Configuración DB y mailer
+│   ├── controllers/      # Lógica de negocio
+│   ├── routes/           # Definición de endpoints
+│   ├── middlewares/      # Auth middleware (JWT)
+│   └── services/         # Servicios externos (email)
+│
+├── front_pl/             # App React + Vite
+│   └── src/
+│       ├── App.jsx       # Rutas principales
+│       ├── pages/        # Vistas (Home, Login, Dashboard, etc)
+│       ├── components/   # Componentes reutilizables
+│       ├── context/      # AuthContext (estado global)
+│       ├── services/     # API services
+│       └── theme/        # Material-UI theme
+│
+├── dataAnalisis.md       # 📊 Documentación técnica completa
+└── QUICK_START.md        # Este archivo
+```
 
-## 📊 **PRUEBAS RÁPIDAS**
+## Endpoints Principales
 
-### **API con Postman:**
-1. **Login:** `POST /api/auth/login`
-   ```json
-   {
-     "email": "admin@mega-malvado.com",
-     "password": "admin123"
-   }
-   ```
-2. **Estadísticas:** `GET /api/dashboard/stats`
-3. **Reservas Recientes:** `GET /api/dashboard/recent-reservas`
+### Autenticación
+```
+POST   /api/auth/login       # Iniciar sesión
+POST   /api/auth/register    # Crear cuenta
+POST   /api/auth/logout      # Cerrar sesión
+GET    /api/auth/verify      # Verificar token
+```
 
-### **Frontend:**
+### Dashboard Admin
+```
+GET    /api/dashboard/stats              # Estadísticas
+GET    /api/dashboard/usuarios           # CRUD usuarios
+GET    /api/dashboard/agendamientos      # TODAS las reservas
+GET    /api/dashboard/servicios          # CRUD servicios
+```
+
+### Cliente
+```
+GET    /api/agendamiento/cliente/:id     # Reservas del cliente
+POST   /api/agendamiento                 # Crear reserva
+GET    /api/perfil/me                    # Perfil del usuario
+PUT    /api/perfil/me                    # Actualizar perfil
+```
+
+## Flujo de Uso Rápido
+
+### Como Cliente (Crear Reserva)
 1. Ir a http://localhost:5173
-2. Login con credenciales de admin
-3. Ver dashboard con estadísticas
-4. Navegar entre módulos (Usuarios, Servicios, etc.)
+2. Login con cliente@test.com
+3. Dashboard → "Nueva Reserva"
+4. Seguir wizard de 5 pasos
+5. Ver reserva en "Mis Reservas"
 
----
+### Como Admin (Gestionar)
+1. Ir a http://localhost:5173
+2. Login con admin@megalavado.com
+3. Dashboard → Ver todas las reservas en "Agendamientos"
 
-## 🗂️ **ARCHIVOS IMPORTANTES**
+## Variables de Entorno
 
-### **Documentación:**
-- `POSTMAN_API_GUIDE.md` - Guía completa de la API
-- `DATABASE_ANALYSIS.md` - Análisis detallado de la BD
-- `DATABASE_SUMMARY.md` - Resumen ejecutivo
-- `VALIDATION_CHECKLIST.md` - Checklist de validación
-
-### **Configuración:**
-- `backend/package.json` - Dependencias backend
-- `front_pl/package.json` - Dependencias frontend
-- `backend/config/db.js` - Configuración BD
-- `postman_collection.json` - Colección Postman
-
----
-
-## 🎯 **FUNCIONALIDADES DISPONIBLES**
-
-### **Módulos Operativos:**
-- ✅ **Autenticación** (login/register/verify)
-- ✅ **Dashboard** (estadísticas, reservas recientes)
-- ✅ **Usuarios** (CRUD completo)
-- ✅ **Servicios** (CRUD completo)
-- ✅ **Reservas/Agendamiento** (CRUD completo)
-- ✅ **Roles y Permisos** (gestión completa)
-- ✅ **Ubicaciones** (CRUD completo)
-- ✅ **Vehículos** (CRUD completo)
-
-### **Datos de Prueba:**
-- **8 Usuarios** (admin, clientes, técnicos, soporte)
-- **12 Reservas** (distintos estados)
-- **10 Servicios** (7 categorías)
-- **4 Vehículos** (activos)
-- **14 Ubicaciones** (Bogotá)
-
----
-
-## 🔧 **COMANDOS ÚTILES**
-
-### **Backend:**
-```bash
-# Ver logs del servidor
-cd backend && npm start
-
-# Verificar dependencias
-npm list --depth=0
-
-# Reiniciar servidor
-rs  # Si usas nodemon
+### Backend (.env)
+```env
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=tu_password
+DB_NAME=LavadoVaporBogotaDB
+JWT_SECRET=tu_secret
+EMAIL_USER=info@megalavado.com
+PORT=3000
 ```
 
-### **Frontend:**
+## Testing con cURL
+
 ```bash
-# Ver logs de desarrollo
-cd front_pl && npm run dev
+# Login
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@megalavado.com","password":"admin123"}'
 
-# Build de producción
-npm run build
-
-# Preview del build
-npm run preview
+# Health check
+curl http://localhost:3000/health
 ```
 
-### **Base de Datos:**
+## Troubleshooting
+
+### Backend no arranca
 ```bash
-# Conectar
-mysql -u root -p -D LavadoVaporBogotaDB
-
-# Ver tablas
-SHOW TABLES;
-
-# Contar registros
-SELECT 'Usuarios' as tabla, COUNT(*) as total FROM Usuarios
-UNION ALL
-SELECT 'Reservas', COUNT(*) FROM Reservas
-UNION ALL
-SELECT 'Servicios', COUNT(*) FROM Servicios;
+# Verificar MySQL corriendo
+mysql -u root -p -e "SHOW DATABASES;"
 ```
 
----
-
-## 🚨 **SOLUCIÓN DE PROBLEMAS**
-
-### **Backend no inicia:**
-```bash
-# Verificar Node.js
-node --version
-
-# Verificar dependencias
-cd backend && npm install
-
-# Verificar BD
-mysql -u root -p -e "SELECT 1"
-```
-
-### **Frontend no carga:**
+### Frontend no arranca
 ```bash
 # Limpiar cache
-cd front_pl && rm -rf node_modules package-lock.json
+rm -rf node_modules package-lock.json
 npm install
 npm run dev
 ```
 
-### **API no responde:**
-```bash
-# Verificar servidor backend
-curl http://localhost:3000/api/test-users
+## Información
 
-# Verificar BD
-mysql -u root -p -e "USE LavadoVaporBogotaDB; SELECT COUNT(*) FROM Usuarios;"
-```
+- **Email:** info@megalavado.com
+- **Documentación completa:** Ver `dataAnalisis.md`
 
 ---
 
-## 📈 **PRÓXIMOS PASOS**
-
-### **Inmediatos:**
-1. **Probar todas las rutas** con Postman
-2. **Validar formularios** del frontend
-3. **Crear nuevas reservas** desde la interfaz
-4. **Probar operaciones CRUD** completas
-
-### **Mediano Plazo:**
-1. **Implementar reportes** de ingresos
-2. **Agregar notificaciones** push
-3. **Sistema de calificaciones**
-4. **Optimización de consultas**
-
-### **Futuro:**
-1. **App móvil**
-2. **Integración pagos**
-3. **API de mapas**
-4. **Sistema de soporte**
-
----
-
-## 📞 **SOPORTE**
-
-### **Documentación Disponible:**
-- 📖 `POSTMAN_API_GUIDE.md` - Referencia completa de API
-- 📊 `DATABASE_ANALYSIS.md` - Detalles técnicos de BD
-- ✅ `VALIDATION_CHECKLIST.md` - Verificación del sistema
-
-### **Puntos de Contacto:**
-- **API Endpoints:** http://localhost:3000/api/
-- **Frontend App:** http://localhost:5173
-- **Base de Datos:** LavadoVaporBogotaDB (MySQL)
-
----
-
-**🎯 Estado del Sistema:** **TOTALMENTE OPERATIVO**  
-**📅 Última actualización:** $(date)  
-**🚀 ¡Listo para usar!**
+**Estado:** ✅ Sistema funcional
