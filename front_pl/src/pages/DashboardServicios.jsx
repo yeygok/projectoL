@@ -26,14 +26,6 @@ const DashboardServicios = () => {
     }).then(r => r.json())
   );
 
-  // Debug logs
-  useEffect(() => {
-    console.log('🔍 DEBUG SERVICIOS:');
-    console.log('Servicios data:', crudOperations.data);
-    console.log('Categorías data:', categorias);
-    console.log('Ejemplo de servicio:', crudOperations.data?.[0]);
-  }, [crudOperations.data, categorias]);
-
   // Utility function
   const formatDuration = (minutes) => {
     if (!minutes) return 'No especificada';
@@ -206,7 +198,6 @@ const DashboardServicios = () => {
       descripcion: item.descripcion || ''
     };
     
-    console.log('Editando servicio:', editData); // Debug log
     setSelectedItem(editData);
     setDialogOpen(true);
   };
@@ -216,7 +207,7 @@ const DashboardServicios = () => {
       try {
         await crudOperations.remove(item.id);
       } catch (error) {
-        console.error('Error deleting servicio:', error);
+        // Error handled by UI
       }
     }
   };
@@ -231,8 +222,6 @@ const DashboardServicios = () => {
         duracion_estimada: parseInt(formData.duracion_estimada)
       };
 
-      console.log('Datos a enviar:', processedData);
-
       if (selectedItem) {
         await crudOperations.update(selectedItem.id, processedData);
       } else {
@@ -242,7 +231,7 @@ const DashboardServicios = () => {
       setSelectedItem(null);
       return true;
     } catch (error) {
-      console.error('Error saving servicio:', error);
+      // Error handled by UI
       alert(`Error al guardar: ${error.message || 'Error desconocido'}`);
       return false;
     }

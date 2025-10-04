@@ -220,7 +220,6 @@ const DashboardAgendamientos = () => {
     const seconds = String(now.getSeconds()).padStart(2, '0');
     
     const fechaServicio = `${year}-${month}-${day}T${hours}:${minutes_str}:${seconds}`;
-    console.log('Fecha generada:', fechaServicio);
     return fechaServicio;
   };  // Default form values
   const defaultValues = {
@@ -243,7 +242,7 @@ const DashboardAgendamientos = () => {
       try {
         await crudOperations.remove(item.id);
       } catch (error) {
-        console.error('Error deleting agendamiento:', error);
+        // Error handled by UI
       }
     }
   };
@@ -262,8 +261,6 @@ const DashboardAgendamientos = () => {
         fecha_servicio: generateServiceDate()
       };
 
-      console.log('Datos procesados para enviar:', processedData);
-
       if (selectedItem) {
         await crudOperations.update(selectedItem.id, processedData);
       } else {
@@ -273,7 +270,6 @@ const DashboardAgendamientos = () => {
       setSelectedItem(null);
       return true;
     } catch (error) {
-      console.error('Error saving agendamiento:', error);
       alert(`Error al guardar: ${error.message || 'Error desconocido'}`);
       return false;
     }

@@ -182,19 +182,73 @@ class DashboardController {
     const { nombre, apellido, email, telefono, ubicacion_id, rol_id, activo } = req.body;
     
     try {
-      const [result] = await pool.query(`
-        UPDATE Usuarios SET nombre = ?, apellido = ?, email = ?, telefono = ?, ubicacion_id = ?, rol_id = ?, activo = ?, updated_at = NOW()
-        WHERE id = ?
-      `, [nombre, apellido, email, telefono, ubicacion_id, rol_id, activo, id]);
+      // Construir query dinámicamente para solo actualizar campos proporcionados
+      const updates = [];
+      const values = [];
+      
+      if (nombre !== undefined) {
+        updates.push('nombre = ?');
+        values.push(nombre);
+      }
+      if (apellido !== undefined) {
+        updates.push('apellido = ?');
+        values.push(apellido);
+      }
+      if (email !== undefined) {
+        updates.push('email = ?');
+        values.push(email);
+      }
+      if (telefono !== undefined) {
+        updates.push('telefono = ?');
+        values.push(telefono);
+      }
+      if (ubicacion_id !== undefined) {
+        updates.push('ubicacion_id = ?');
+        values.push(ubicacion_id);
+      }
+      if (rol_id !== undefined) {
+        updates.push('rol_id = ?');
+        values.push(rol_id);
+      }
+      if (activo !== undefined) {
+        updates.push('activo = ?');
+        values.push(activo);
+      }
+      
+      if (updates.length === 0) {
+        return res.status(400).json({ error: 'No se proporcionaron campos para actualizar' });
+      }
+      
+      updates.push('updated_at = NOW()');
+      values.push(id);
+      
+      const query = `UPDATE Usuarios SET ${updates.join(', ')} WHERE id = ?`;
+      const [result] = await pool.query(query, values);
       
       if (result.affectedRows === 0) {
         return res.status(404).json({ error: 'Usuario no encontrado' });
       }
       
-      res.json({ id, mensaje: 'Usuario actualizado exitosamente' });
+      // Obtener el usuario actualizado para devolverlo
+      const [updatedUser] = await pool.query(`
+        SELECT u.*, r.nombre as rol_nombre
+        FROM Usuarios u
+        LEFT JOIN Roles r ON u.rol_id = r.id
+        WHERE u.id = ?
+      `, [id]);
+      
+      res.json({ 
+        id, 
+        mensaje: 'Usuario actualizado exitosamente',
+        usuario: updatedUser[0]
+      });
     } catch (error) {
       console.error('Error al actualizar usuario:', error);
-      res.status(500).json({ error: 'Error al actualizar usuario' });
+      if (error.code === 'ER_DUP_ENTRY') {
+        res.status(409).json({ error: 'El email ya está registrado' });
+      } else {
+        res.status(500).json({ error: 'Error al actualizar usuario', detalles: error.message });
+      }
     }
   }
 

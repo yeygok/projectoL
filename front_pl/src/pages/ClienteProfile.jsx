@@ -124,15 +124,22 @@ const ClienteProfile = () => {
 
     setLoading(true);
     try {
-      const result = await updateProfile(profileData);
-      if (result.success) {
+      // Solo enviar los campos que cambiaron
+      const dataToSend = {
+        nombre: profileData.nombre,
+        apellido: profileData.apellido,
+        telefono: profileData.telefono
+      };
+      
+      const result = await updateProfile(dataToSend);
+      if (result.success || result.usuario) {
         setMessage({ type: 'success', text: 'Perfil actualizado exitosamente' });
         setIsEditing(false);
       } else {
         setMessage({ type: 'error', text: result.message || 'Error al actualizar perfil' });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Error de conexión' });
+      setMessage({ type: 'error', text: error.message || 'Error de conexión' });
     } finally {
       setLoading(false);
     }
@@ -143,10 +150,23 @@ const ClienteProfile = () => {
 
     setLoading(true);
     try {
-      await authService.changePassword(passwordData.currentPassword, passwordData.newPassword);
-      setMessage({ type: 'success', text: 'Contraseña actualizada exitosamente' });
-      setIsChangingPassword(false);
-      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      // Enviar con los nombres correctos que espera el backend
+      const dataToSend = {
+        nombre: user?.nombre,
+        apellido: user?.apellido,
+        telefono: user?.telefono,
+        password_actual: passwordData.currentPassword,
+        password: passwordData.newPassword
+      };
+      
+      const result = await updateProfile(dataToSend);
+      if (result.success || result.usuario) {
+        setMessage({ type: 'success', text: 'Contraseña actualizada exitosamente' });
+        setIsChangingPassword(false);
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      } else {
+        setMessage({ type: 'error', text: result.message || 'Error al cambiar contraseña' });
+      }
     } catch (error) {
       setMessage({ type: 'error', text: error.message || 'Error al cambiar contraseña' });
     } finally {

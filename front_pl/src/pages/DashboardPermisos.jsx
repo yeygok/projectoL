@@ -191,7 +191,7 @@ const DashboardPermisos = () => {
       try {
         await crudOperations.remove(item.id_permiso);
       } catch (error) {
-        console.error('Error deleting permiso:', error);
+        // Error handled by UI
       }
     }
   };
@@ -207,7 +207,7 @@ const DashboardPermisos = () => {
       setSelectedItem(null);
       return true;
     } catch (error) {
-      console.error('Error saving permiso:', error);
+      // Error handled by UI
       return false;
     }
   };

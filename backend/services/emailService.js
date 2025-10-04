@@ -271,9 +271,7 @@ class EmailService {
   // Método base para enviar emails
   async sendEmail(mailOptions) {
     try {
-      console.log('📧 Enviando email a:', mailOptions.to);
       const result = await transporter.sendMail(mailOptions);
-      console.log('✅ Email enviado exitosamente:', result.messageId);
       return { success: true, messageId: result.messageId };
     } catch (error) {
       console.error('❌ Error enviando email:', error);

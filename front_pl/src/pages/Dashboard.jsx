@@ -82,7 +82,7 @@ const Dashboard = () => {
     try {
       setUser(JSON.parse(userData));
     } catch (error) {
-      console.error('Error parsing user data:', error);
+      // Error handled by UI
     }
   }, []);
 
@@ -143,9 +143,9 @@ const Dashboard = () => {
     },
     { 
       path: '/dashboard/tipos', 
-      name: 'Configuración', 
+      name: 'Calificaciones', 
       icon: <SettingsIcon />,
-      description: 'Tipos de servicios y configuración'
+      description: 'Módulo en desarrollo - Sistema de calificaciones'
     },
     { 
       path: '/dashboard/perfil', 
@@ -167,10 +167,16 @@ const Dashboard = () => {
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
-    logout();
-    handleProfileMenuClose();
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await logout(); // Esperar a que el logout termine
+      handleProfileMenuClose();
+      navigate('/'); // Redirigir al Home
+    } catch (error) {
+      // En caso de error, igual redirigir
+      handleProfileMenuClose();
+      navigate('/');
+    }
   };
 
   // Verificar si el usuario está autenticado

@@ -233,9 +233,26 @@ const changePassword = async (req, res) => {
   }
 };
 
+// Logout (invalidar token en el cliente)
+const logout = async (req, res) => {
+  try {
+    // En JWT sin base de datos de tokens, el logout se maneja en el cliente
+    // eliminando el token del localStorage/sessionStorage
+    // Aquí solo confirmamos la operación
+    
+    return res.json({ 
+      message: 'Logout exitoso',
+      success: true 
+    });
+  } catch (error) {
+    return res.status(500).json({ error: 'Error en el logout' });
+  }
+};
+
 module.exports = {
   register,
   login,
+  logout,
   verifyToken,
   changePassword,
 };

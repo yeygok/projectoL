@@ -230,7 +230,7 @@ const DashboardProductos = () => {
       try {
         await crudOperations.remove(item.id_producto);
       } catch (error) {
-        console.error('Error deleting producto:', error);
+        // Error handled by UI
       }
     }
   };
@@ -254,7 +254,7 @@ const DashboardProductos = () => {
       setSelectedItem(null);
       return true;
     } catch (error) {
-      console.error('Error saving producto:', error);
+      // Error handled by UI
       return false;
     }
   };

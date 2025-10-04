@@ -36,9 +36,14 @@ const ClienteLayout = ({ children }) => {
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await logout(); // Esperar a que el logout termine
+      navigate('/'); // Redirigir al Home
+    } catch (error) {
+      // En caso de error, igual redirigir
+      navigate('/');
+    }
   };
 
   const navItems = [
@@ -63,10 +68,15 @@ const ClienteLayout = ({ children }) => {
                 fontWeight: 700,
                 cursor: 'pointer',
                 mr: 4,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  color: 'secondary.light',
+                  transform: 'scale(1.05)',
+                }
               }}
-              onClick={() => navigate('/cliente')}
+              onClick={() => navigate('/')}
             >
-              MEGA MALVADO
+              MEGA LAVADO
             </Typography>
 
             {/* Desktop Navigation */}
@@ -170,10 +180,10 @@ const ClienteLayout = ({ children }) => {
       >
         <Container maxWidth="lg">
           <Typography variant="body2" color="grey.400">
-            © 2025 Mega Malvado Lavado Vapor. Todos los derechos reservados.
+            © 2025 Mega Lavado Vapor. Todos los derechos reservados.
           </Typography>
           <Typography variant="caption" color="grey.500">
-            Contáctanos: +57 300 123 4567 | info@megamalvado.com
+            Contáctanos: +57 300 123 4567 | info@megalavado.com
           </Typography>
         </Container>
       </Box>

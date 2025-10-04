@@ -185,7 +185,7 @@ const DashboardTiposServicio = () => {
     try {
       await crudOperations.remove(item.id);
     } catch (error) {
-      console.error('Error deleting tipo servicio:', error);
+      // Error handled by UI
     }
   };
 
@@ -200,7 +200,7 @@ const DashboardTiposServicio = () => {
       setSelectedItem(null);
       return true;
     } catch (error) {
-      console.error('Error saving tipo servicio:', error);
+      // Error handled by UI
       return false;
     }
   };

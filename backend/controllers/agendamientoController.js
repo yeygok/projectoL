@@ -168,7 +168,6 @@ const createAgendamiento = async (req, res) => {
         [ubicacion.direccion, ubicacion.barrio, ubicacion.localidad, ubicacion.zona || 'norte']
       );
       ubicacionId = ubicacionResult.insertId;
-      console.log(`✅ Nueva ubicación creada con ID: ${ubicacionId}`);
       
       // Obtener los datos de la ubicación recién creada
       const [ubicacionRows] = await connection.query(
@@ -196,7 +195,6 @@ const createAgendamiento = async (req, res) => {
       
       if (vehiculoExistente.length > 0) {
         vehiculoId = vehiculoExistente[0].id;
-        console.log(`✅ Vehículo existente encontrado con ID: ${vehiculoId}`);
       } else {
         // Crear nuevo vehículo
         const [vehiculoResult] = await connection.query(
@@ -204,7 +202,6 @@ const createAgendamiento = async (req, res) => {
           [vehiculo.modelo, vehiculo.placa, cliente_id]
         );
         vehiculoId = vehiculoResult.insertId;
-        console.log(`✅ Nuevo vehículo creado con ID: ${vehiculoId}`);
       }
     } else if (vehiculoId) {
       // Validar que el vehículo exista
@@ -276,7 +273,7 @@ const createAgendamiento = async (req, res) => {
         cliente: clienteData,
         reserva: {
           id: reservaId,
-          fecha_servicio: mysqlFechaServicio, // ✅ Usar formato MySQL
+          fecha_servicio: mysqlFechaServicio,
           precio_total: precio_total,
           observaciones: observaciones,
           estado: 'pendiente'
@@ -290,26 +287,15 @@ const createAgendamiento = async (req, res) => {
       };
 
       // Email de confirmación al cliente
-      const emailResult = await emailService.sendReservaConfirmation(reservaData);
-      if (emailResult.success) {
-        console.log(`✅ Email de confirmación enviado a: ${clienteData.email}`);
-      } else {
-        console.log(`❌ Error enviando email de confirmación: ${emailResult.error}`);
-      }
+      await emailService.sendReservaConfirmation(reservaData);
       
       // Email al técnico si está asignado
       if (tecnicoData && tecnicoData.email) {
-        const tecnicoEmailResult = await emailService.sendTecnicoNotification(reservaData);
-        if (tecnicoEmailResult.success) {
-          console.log(`✅ Email de notificación enviado al técnico: ${tecnicoData.email}`);
-        } else {
-          console.log(`❌ Error enviando email al técnico: ${tecnicoEmailResult.error}`);
-        }
+        await emailService.sendTecnicoNotification(reservaData);
       }
       
     } catch (emailError) {
       console.error('❌ Error al enviar emails de notificación:', emailError.message);
-      // No fallar la respuesta si los correos fallan
     }
     
     res.status(201).json({ 
@@ -482,7 +468,6 @@ const updateAgendamiento = async (req, res) => {
     }
 
     await connection.commit();
-    console.log(`✅ Reserva ${req.params.id} actualizada exitosamente`);
     
     // Obtener nuevo estado para notificaciones
     const nuevoEstado = estadoRows[0];
@@ -513,7 +498,6 @@ const updateAgendamiento = async (req, res) => {
           nuevoEstado.estado, 
           reservaAnterior[0].estado_anterior
         );
-        console.log(`✅ Email de actualización enviado por cambio de estado`);
         
       } catch (emailError) {
         console.error('❌ Error enviando email de actualización:', emailError.message);
@@ -823,7 +807,6 @@ const getReservasByCliente = async (req, res) => {
       ORDER BY r.fecha_servicio DESC, r.created_at DESC
     `, [clienteId]);
     
-    console.log(`✅ ${reservas.length} reservas encontradas para cliente ${clienteId}`);
     res.json(reservas);
     
   } catch (error) {

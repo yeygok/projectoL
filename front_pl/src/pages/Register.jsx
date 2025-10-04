@@ -119,8 +119,8 @@ const Register = () => {
             replace: true 
           });
         } else {
-          // Ir al dashboard del cliente con mensaje de bienvenida
-          navigate('/cliente', { 
+          // ✅ Ir al HOME para que vea la landing page y pueda reservar desde ahí
+          navigate('/', { 
             state: { 
               welcomeMessage: `¡Bienvenido ${formData.nombre}! Tu cuenta ha sido creada exitosamente.` 
             },
@@ -131,7 +131,6 @@ const Register = () => {
         setError(result.message || 'Error al registrar usuario');
       }
     } catch (err) {
-      console.error('Error en registro:', err);
       setError('Error al registrar usuario. Por favor intenta nuevamente.');
     } finally {
       setLoading(false);

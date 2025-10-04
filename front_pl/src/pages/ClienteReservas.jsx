@@ -45,7 +45,6 @@ const ClienteReservas = () => {
       
       // Cargar reservas del cliente autenticado
       const data = await agendamientoService.getByCliente(user.id);
-      console.log('Reservas cargadas:', data);
       
       // Transformar datos del backend al formato del componente
       const reservasFormateadas = data.map(reserva => ({
@@ -66,7 +65,6 @@ const ClienteReservas = () => {
       setReservas(reservasFormateadas);
       setLoading(false);
     } catch (err) {
-      console.error('Error loading reservas:', err);
       setError('Error al cargar las reservas');
       setLoading(false);
     }
@@ -273,7 +271,7 @@ const ClienteReservas = () => {
                         variant="outlined"
                         size="small"
                         fullWidth
-                        onClick={() => console.log('Ver detalles', reserva.id)}
+                        onClick={() => {/* TODO: Implementar ver detalles */}}
                       >
                         Ver Detalles
                       </Button>
@@ -283,7 +281,7 @@ const ClienteReservas = () => {
                           color="error"
                           size="small"
                           fullWidth
-                          onClick={() => console.log('Cancelar', reserva.id)}
+                          onClick={() => {/* TODO: Implementar cancelación */}}
                         >
                           Cancelar
                         </Button>

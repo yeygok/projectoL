@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }) => {
         logout();
       }
     } catch (error) {
-      console.error('Token inválido:', error);
+      // Token validation failed
       logout();
     } finally {
       setLoading(false);
@@ -75,7 +75,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    // Llamar al servicio de logout en el backend primero
+    try {
+      await authService.logout();
+    } catch (error) {
+      // Logout notification failed (non-critical, continue anyway)
+    }
+    
     // Limpiar todo el estado
     setUser(null);
     setToken('');
@@ -87,12 +94,7 @@ export const AuthProvider = ({ children }) => {
     // Asegurar que loading es false
     setLoading(false);
     
-    // Llamar al servicio de logout en el backend (opcional pero recomendado)
-    try {
-      authService.logout();
-    } catch (error) {
-      console.warn('Error al notificar logout al servidor:', error);
-    }
+    return { success: true };
   };
 
   const register = async (userData) => {

@@ -30,7 +30,7 @@ const DashboardEstadosReserva = () => {
       const data = await estadoReservaService.getEstadisticas();
       setEstadisticas(data);
     } catch (error) {
-      console.error('Error loading estadísticas:', error);
+      // Error handled by UI
     }
   };
 
@@ -199,7 +199,7 @@ const DashboardEstadosReserva = () => {
       await crudOperations.remove(item.id);
       loadEstadisticas(); // Recargar estadísticas después de eliminar
     } catch (error) {
-      console.error('Error deleting estado:', error);
+      // Error handled by UI
     }
   };
 
@@ -215,7 +215,7 @@ const DashboardEstadosReserva = () => {
       loadEstadisticas(); // Recargar estadísticas después de guardar
       return true;
     } catch (error) {
-      console.error('Error saving estado:', error);
+      // Error handled by UI
       return false;
     }
   };

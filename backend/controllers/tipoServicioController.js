@@ -27,7 +27,6 @@ class TipoServicioController {
         ORDER BY ts.nombre ASC
       `);
       
-      console.log(`✅ ${tipos.length} tipos de servicio obtenidos exitosamente`);
       res.json(tipos);
       
     } catch (error) {
@@ -61,7 +60,6 @@ class TipoServicioController {
         return res.status(404).json({ error: 'Tipo de servicio no encontrado' });
       }
       
-      console.log(`✅ Tipo de servicio ${id} obtenido exitosamente`);
       res.json(tipo[0]);
       
     } catch (error) {
@@ -140,8 +138,6 @@ class TipoServicioController {
         multiplicador_precio: parseFloat(multiplicador),
         color: color?.toUpperCase() || null
       };
-      
-      console.log(`✅ Tipo de servicio creado exitosamente: ID ${result.insertId} - ${nombre}`);
       
       res.status(201).json({
         mensaje: 'Tipo de servicio creado exitosamente',
@@ -252,8 +248,6 @@ class TipoServicioController {
         [id]
       );
       
-      console.log(`✅ Tipo de servicio ${id} actualizado exitosamente`);
-      
       res.json({ 
         mensaje: 'Tipo de servicio actualizado exitosamente',
         tipo: tipoActualizado[0]
@@ -303,8 +297,6 @@ class TipoServicioController {
       
       // Eliminar permanentemente
       await pool.query('DELETE FROM TiposServicio WHERE id = ?', [id]);
-      
-      console.log(`✅ Tipo de servicio ${id} eliminado exitosamente`);
       
       res.json({ 
         mensaje: 'Tipo de servicio eliminado exitosamente',

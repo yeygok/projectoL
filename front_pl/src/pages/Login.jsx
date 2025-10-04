@@ -57,7 +57,7 @@ const Login = () => {
           state: { categoriaPreseleccionada },
           replace: true 
         });
-      } else if (from) {
+      } else if (from && from !== '/login') {
         navigate(from, { replace: true });
       } else {
         // Redireccionar según el rol
@@ -66,13 +66,14 @@ const Login = () => {
             navigate('/dashboard', { replace: true });
             break;
           case ROLES.CLIENTE:
-            navigate('/cliente', { replace: true });
+            // ✅ CLIENTES van al HOME para ver la landing page
+            navigate('/', { replace: true });
             break;
           case ROLES.TECNICO:
             navigate('/tecnico', { replace: true });
             break;
           default:
-            navigate('/cliente', { replace: true });
+            navigate('/', { replace: true });
         }
       }
       setJustLoggedIn(false); // Reset flag
@@ -146,7 +147,7 @@ const Login = () => {
           </Avatar>
           
           <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 600 }}>
-            Mega Malvado
+            Mega Lavado
           </Typography>
           
           <Typography variant="subtitle1" color="text.secondary" gutterBottom sx={{ mb: 4 }}>

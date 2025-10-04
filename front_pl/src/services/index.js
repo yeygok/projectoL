@@ -34,7 +34,7 @@ export const authService = {
   },
 
   async updateProfile(profileData) {
-    return apiService.put('/api/auth/profile', profileData);
+    return apiService.put('/api/perfil/me', profileData);
   },
 
   async changePassword(currentPassword, newPassword) {

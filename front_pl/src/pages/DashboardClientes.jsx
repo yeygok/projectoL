@@ -200,7 +200,7 @@ const DashboardClientes = () => {
     try {
       await crudOperations.remove(item.id);
     } catch (error) {
-      console.error('Error deleting cliente:', error);
+      // Error handled by UI
     }
   };
 
@@ -226,7 +226,7 @@ const DashboardClientes = () => {
       setSelectedItem(null);
       return true;
     } catch (error) {
-      console.error('Error saving cliente:', error);
+      // Error handled by UI
       return false;
     }
   };

@@ -205,7 +205,7 @@ const DashboardUsuarios = () => {
       try {
         await crudOperations.remove(item.id);
       } catch (error) {
-        console.error('Error deleting usuario:', error);
+        // Error handled by UI
       }
     }
   };
@@ -226,7 +226,7 @@ const DashboardUsuarios = () => {
       setSelectedItem(null);
       return true;
     } catch (error) {
-      console.error('Error saving usuario:', error);
+      // Error handled by UI
       return false;
     }
   };

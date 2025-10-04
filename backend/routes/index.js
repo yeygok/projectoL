@@ -32,7 +32,7 @@ const estadoReservaRoutes = require('./estado_reserva');
 // Configurar rutas
 router.use('/auth', authRoutes);
 router.use('/services', serviceRoutes);
-router.use('/perfiles', perfilRoutes);
+router.use('/perfil', perfilRoutes); // Cambiar de /perfiles a /perfil para que coincida con el frontend
 router.use('/clientes', clienteRoutes);
 router.use('/agendamiento', agendamientoRoutes);
 router.use('/dashboard', dashboardRoutes);

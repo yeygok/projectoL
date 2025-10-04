@@ -173,7 +173,7 @@ const DashboardRoles = () => {
     try {
       await crudOperations.remove(item.id);
     } catch (error) {
-      console.error('Error deleting rol:', error);
+      // Error handled by UI
     }
   };
 
@@ -188,7 +188,7 @@ const DashboardRoles = () => {
       setSelectedItem(null);
       return true;
     } catch (error) {
-      console.error('Error saving rol:', error);
+      // Error handled by UI
       return false;
     }
   };

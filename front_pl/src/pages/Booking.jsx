@@ -34,6 +34,12 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
 import es from 'date-fns/locale/es';
 
+// Importar imágenes
+import colchonImg from '../assets/img/colchon.jpg';
+import sofaImg from '../assets/img/sofa.png';
+import tapeteImg from '../assets/img/tapete.jpg';
+import vehiculoImg from '../assets/img/vehiculo.jpg';
+
 const Booking = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -113,10 +119,19 @@ const Booking = () => {
 
       setLoading(false);
     } catch (err) {
-      console.error('Error loading data:', err);
       setError('Error al cargar los datos. Por favor, recarga la página.');
       setLoading(false);
     }
+  };
+
+  // Función para obtener la imagen según el nombre de la categoría
+  const getCategoriaImage = (nombreCategoria) => {
+    const nombre = nombreCategoria.toLowerCase();
+    if (nombre.includes('colchon')) return colchonImg;
+    if (nombre.includes('mueble') || nombre.includes('sofá') || nombre.includes('sofa')) return sofaImg;
+    if (nombre.includes('alfombra') || nombre.includes('tapete')) return tapeteImg;
+    if (nombre.includes('vehículo') || nombre.includes('vehiculo') || nombre.includes('auto')) return vehiculoImg;
+    return sofaImg; // Default
   };
 
   const handleNext = () => {
@@ -197,10 +212,7 @@ const Booking = () => {
         };
       }
       
-      console.log('Creating reserva:', reservaData);
-      
       const result = await agendamientoService.create(reservaData);
-      console.log('Reserva created:', result);
       
       setSuccess(true);
       setTimeout(() => {
@@ -208,7 +220,6 @@ const Booking = () => {
       }, 2000);
 
     } catch (err) {
-      console.error('Error creating booking:', err);
       setError(err.message || 'Error al crear la reserva. Por favor, intenta nuevamente.');
     } finally {
       setLoading(false);
@@ -245,46 +256,159 @@ const Booking = () => {
       case 0:
         return (
           <Box>
-            <Typography variant="h5" gutterBottom align="center" sx={{ mb: 3 }}>
+            <Typography 
+              variant="h4" 
+              gutterBottom 
+              align="center" 
+              sx={{ 
+                mb: 2,
+                fontWeight: 700,
+                color: 'primary.main'
+              }}
+            >
               ¿Qué deseas limpiar?
             </Typography>
-            <Grid container spacing={3}>
+            <Typography 
+              variant="body1" 
+              align="center" 
+              color="text.secondary"
+              sx={{ mb: 5 }}
+            >
+              Selecciona el servicio que necesitas
+            </Typography>
+            
+            <Grid container spacing={4} justifyContent="center">
               {categorias.map((categoria) => (
-                <Grid item xs={12} sm={6} md={3} key={categoria.id}>
+                <Grid item xs={12} sm={6} md={6} key={categoria.id}>
                   <Card
                     sx={{
                       cursor: 'pointer',
-                      transition: 'all 0.3s',
-                      border: bookingData.categoria_id === categoria.id ? 3 : 1,
-                      borderColor: bookingData.categoria_id === categoria.id ? 'primary.main' : 'grey.300',
+                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                      border: bookingData.categoria_id === categoria.id ? 3 : 2,
+                      borderColor: bookingData.categoria_id === categoria.id ? 'primary.main' : 'grey.200',
+                      borderRadius: 4,
+                      overflow: 'hidden',
+                      position: 'relative',
+                      height: '100%',
+                      boxShadow: bookingData.categoria_id === categoria.id 
+                        ? '0 12px 40px rgba(25, 118, 210, 0.3)' 
+                        : '0 4px 12px rgba(0,0,0,0.08)',
                       '&:hover': {
-                        transform: 'translateY(-4px)',
-                        boxShadow: 4,
+                        transform: 'translateY(-12px) scale(1.02)',
+                        boxShadow: '0 20px 60px rgba(25, 118, 210, 0.25)',
+                        borderColor: 'primary.main',
+                        '& .categoria-image': {
+                          transform: 'scale(1.1)',
+                        },
+                        '& .categoria-overlay': {
+                          opacity: 0.15,
+                        },
                       },
                     }}
                     onClick={() => handleCategoriaSelect(categoria.id)}
                   >
-                    <Box sx={{ 
-                      height: 120, 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center',
-                      bgcolor: 'primary.light',
-                      fontSize: '4rem',
-                    }}>
-                      {categoria.emoji}
+                    {/* Imagen con Overlay */}
+                    <Box sx={{ position: 'relative', overflow: 'hidden', height: 280 }}>
+                      <CardMedia
+                        className="categoria-image"
+                        component="img"
+                        height="280"
+                        image={getCategoriaImage(categoria.nombre)}
+                        alt={categoria.nombre}
+                        sx={{
+                          objectFit: 'cover',
+                          transition: 'transform 0.4s ease',
+                        }}
+                      />
+                      {/* Overlay Gradient */}
+                      <Box
+                        className="categoria-overlay"
+                        sx={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 100%)',
+                          opacity: 0.3,
+                          transition: 'opacity 0.4s ease',
+                        }}
+                      />
+                      
+                      {/* Check de Selección */}
+                      {bookingData.categoria_id === categoria.id && (
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            top: 20,
+                            right: 20,
+                            bgcolor: 'success.main',
+                            borderRadius: '50%',
+                            width: 56,
+                            height: 56,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 4px 20px rgba(46, 125, 50, 0.5)',
+                            animation: 'checkPulse 1s ease-in-out',
+                            '@keyframes checkPulse': {
+                              '0%': { transform: 'scale(0)', opacity: 0 },
+                              '50%': { transform: 'scale(1.1)' },
+                              '100%': { transform: 'scale(1)', opacity: 1 },
+                            },
+                          }}
+                        >
+                          <CheckIcon sx={{ color: 'white', fontSize: 32 }} />
+                        </Box>
+                      )}
                     </Box>
-                    <CardContent>
-                      <Typography variant="h6" align="center" gutterBottom>
+
+                    {/* Contenido */}
+                    <CardContent 
+                      sx={{ 
+                        bgcolor: 'white',
+                        p: 3,
+                        background: bookingData.categoria_id === categoria.id 
+                          ? 'linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%)'
+                          : 'white',
+                        transition: 'background 0.3s ease',
+                      }}
+                    >
+                      <Typography 
+                        variant="h5" 
+                        align="center" 
+                        gutterBottom 
+                        sx={{ 
+                          fontWeight: 700,
+                          color: bookingData.categoria_id === categoria.id ? 'primary.main' : 'text.primary',
+                          transition: 'color 0.3s ease',
+                        }}
+                      >
                         {categoria.nombre}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" align="center">
+                      <Typography 
+                        variant="body1" 
+                        color="text.secondary" 
+                        align="center"
+                        sx={{ lineHeight: 1.6 }}
+                      >
                         {categoria.descripcion}
                       </Typography>
+                      
+                      {/* Badge de Seleccionado */}
                       {bookingData.categoria_id === categoria.id && (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                          <CheckIcon color="primary" />
-                        </Box>
+                        <Chip 
+                          label="Seleccionado" 
+                          color="primary"
+                          size="small"
+                          sx={{ 
+                            mt: 2,
+                            display: 'flex',
+                            width: 'fit-content',
+                            mx: 'auto',
+                            fontWeight: 600,
+                          }}
+                        />
                       )}
                     </CardContent>
                   </Card>
@@ -628,20 +752,57 @@ const Booking = () => {
   }
 
   return (
-    <Box sx={{ bgcolor: 'grey.50', minHeight: '80vh', py: 4 }}>
-      <Container maxWidth="lg">
+    <Box 
+      sx={{ 
+        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+        minHeight: '100vh', 
+        py: 6,
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '300px',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          opacity: 0.1,
+          zIndex: 0,
+        }
+      }}
+    >
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         {/* Header */}
-        <Box sx={{ mb: 4, textAlign: 'center' }}>
-          <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
+        <Box sx={{ mb: 5, textAlign: 'center' }}>
+          <Typography 
+            variant="h3" 
+            sx={{ 
+              fontWeight: 800, 
+              mb: 2,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
             Agenda tu Servicio
           </Typography>
-          <Typography variant="h6" color="text.secondary">
+          <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 400 }}>
             Sigue los pasos para completar tu reserva
           </Typography>
         </Box>
 
         {/* Stepper */}
-        <Paper sx={{ p: 3, mb: 4 }}>
+        <Paper 
+          elevation={3}
+          sx={{ 
+            p: 4, 
+            mb: 5,
+            borderRadius: 3,
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+          }}
+        >
           <Stepper activeStep={activeStep} alternativeLabel>
             {steps.map((label) => (
               <Step key={label}>
@@ -653,23 +814,43 @@ const Booking = () => {
 
         {/* Error Alert */}
         {error && (
-          <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError('')}>
+          <Alert severity="error" sx={{ mb: 4, borderRadius: 2 }} onClose={() => setError('')}>
             {error}
           </Alert>
         )}
 
         {/* Step Content */}
-        <Box sx={{ mb: 4 }}>
+        <Box sx={{ mb: 5 }}>
           {renderStepContent()}
         </Box>
 
         {/* Navigation Buttons */}
-        <Paper sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Paper 
+          elevation={3}
+          sx={{ 
+            p: 4,
+            borderRadius: 3,
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+          }}
+        >
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
             <Button
               variant="outlined"
               onClick={handleBack}
               disabled={activeStep === 0 || loading}
+              size="large"
+              sx={{
+                borderRadius: 2,
+                px: 4,
+                py: 1.5,
+                fontSize: '1rem',
+                fontWeight: 600,
+                borderWidth: 2,
+                '&:hover': {
+                  borderWidth: 2,
+                }
+              }}
             >
               Atrás
             </Button>
@@ -678,6 +859,20 @@ const Booking = () => {
               variant="contained"
               onClick={activeStep === steps.length - 1 ? handleSubmit : handleNext}
               disabled={loading}
+              size="large"
+              sx={{
+                borderRadius: 2,
+                px: 5,
+                py: 1.5,
+                fontSize: '1rem',
+                fontWeight: 700,
+                boxShadow: '0 4px 14px rgba(102, 126, 234, 0.4)',
+                '&:hover': {
+                  boxShadow: '0 6px 20px rgba(102, 126, 234, 0.6)',
+                  transform: 'translateY(-2px)',
+                },
+                transition: 'all 0.3s ease',
+              }}
             >
               {loading ? (
                 <CircularProgress size={24} color="inherit" />

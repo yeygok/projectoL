@@ -25,7 +25,6 @@ class CategoriaController {
         ORDER BY cs.orden ASC, cs.nombre ASC
       `);
       
-      console.log(`✅ ${categorias.length} categorías obtenidas exitosamente`);
       res.json(categorias);
       
     } catch (error) {
@@ -73,7 +72,6 @@ class CategoriaController {
         servicios: servicios
       };
       
-      console.log(`✅ Categoría ${id} obtenida exitosamente`);
       res.json(result);
       
     } catch (error) {
@@ -140,7 +138,6 @@ class CategoriaController {
         activa: 1
       };
       
-      console.log(`✅ Categoría creada exitosamente: ID ${result.insertId} - ${nombre}`);
       
       res.status(201).json({
         mensaje: 'Categoría creada exitosamente',
@@ -244,7 +241,6 @@ class CategoriaController {
         [id]
       );
       
-      console.log(`✅ Categoría ${id} actualizada exitosamente`);
       
       res.json({ 
         mensaje: 'Categoría actualizada exitosamente',
@@ -306,7 +302,6 @@ class CategoriaController {
         [id]
       );
       
-      console.log(`✅ Categoría ${id} desactivada exitosamente`);
       
       res.json({ 
         mensaje: 'Categoría desactivada exitosamente',
@@ -352,7 +347,6 @@ class CategoriaController {
         [id]
       );
       
-      console.log(`✅ Categoría ${id} reactivada exitosamente`);
       
       res.json({ 
         mensaje: 'Categoría reactivada exitosamente',

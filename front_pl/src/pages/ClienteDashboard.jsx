@@ -159,7 +159,7 @@ const ClienteDashboard = () => {
             ¿Necesitas ayuda?
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            Contáctanos: +57 300 123 4567 | info@megamalvado.com
+            Contáctanos: +57 300 123 4567 | info@megalavado.com
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Horarios de atención: Lun - Sáb, 7:00 AM - 6:00 PM

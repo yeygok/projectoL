@@ -1,3 +1,6 @@
+// Cargar variables de entorno ANTES de cualquier otra cosa
+require('dotenv').config();
+
 const emailService = require('../services/emailService');
 
 /**

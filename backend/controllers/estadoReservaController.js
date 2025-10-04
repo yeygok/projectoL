@@ -26,7 +26,6 @@ class EstadoReservaController {
         ORDER BY er.id ASC
       `);
       
-      console.log(`✅ ${estados.length} estados de reserva obtenidos exitosamente`);
       res.json(estados);
       
     } catch (error) {
@@ -80,7 +79,6 @@ class EstadoReservaController {
         reservas_muestra: reservasMuestra
       };
       
-      console.log(`✅ Estado de reserva ${id} obtenido exitosamente`);
       res.json(result);
       
     } catch (error) {
@@ -145,7 +143,6 @@ class EstadoReservaController {
         color: color?.toUpperCase() || null
       };
       
-      console.log(`✅ Estado de reserva creado exitosamente: ID ${result.insertId} - ${estado}`);
       
       res.status(201).json({
         mensaje: 'Estado de reserva creado exitosamente',
@@ -245,7 +242,6 @@ class EstadoReservaController {
         [id]
       );
       
-      console.log(`✅ Estado de reserva ${id} actualizado exitosamente`);
       
       res.json({ 
         mensaje: 'Estado de reserva actualizado exitosamente',
@@ -311,7 +307,6 @@ class EstadoReservaController {
       // Eliminar permanentemente
       await pool.query('DELETE FROM EstadosReserva WHERE id = ?', [id]);
       
-      console.log(`✅ Estado de reserva ${id} eliminado exitosamente`);
       
       res.json({ 
         mensaje: 'Estado de reserva eliminado exitosamente',
@@ -352,7 +347,6 @@ class EstadoReservaController {
         ORDER BY total_reservas DESC
       `);
       
-      console.log('✅ Estadísticas de estados obtenidas exitosamente');
       res.json({
         estadisticas: stats,
         total_estados: stats.length,

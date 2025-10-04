@@ -25,7 +25,7 @@ import { useAuth } from '../context/AuthContext';
 import { NotificationProvider } from '../components/common';
 
 const DashboardPerfil = () => {
-  const { user, updateProfile, changePassword } = useAuth();
+  const { user, setUser } = useAuth();
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -58,13 +58,44 @@ const DashboardPerfil = () => {
       setLoading(true);
       setMessage({ type: '', text: '' });
       
-      await updateProfile(profileData);
-      setEditMode(false);
-      setMessage({ type: 'success', text: 'Perfil actualizado exitosamente' });
+      // Usar el endpoint de usuarios del dashboard
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:3000/api/dashboard/usuarios/${user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(profileData)
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.mensaje) {
+        // Actualizar el usuario en el contexto con los datos devueltos por el servidor
+        const updatedUser = { 
+          ...user, 
+          ...profileData,
+          // Asegurarnos de mantener el rol_nombre si viene en la respuesta
+          rol_nombre: data.usuario?.rol_nombre || user.rol_nombre
+        };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        setEditMode(false);
+        setLoading(false);
+        setMessage({ type: 'success', text: data.mensaje });
+      } else if (response.ok) {
+        setLoading(false);
+        setMessage({ type: 'success', text: 'Perfil actualizado exitosamente' });
+        setEditMode(false);
+      } else {
+        setLoading(false);
+        setMessage({ type: 'error', text: data.error || 'Error al actualizar el perfil' });
+      }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Error al actualizar el perfil' });
-    } finally {
       setLoading(false);
+      setMessage({ type: 'error', text: 'Error de conexión al actualizar el perfil' });
     }
   };
 
@@ -75,17 +106,41 @@ const DashboardPerfil = () => {
 
       if (passwordData.newPassword !== passwordData.confirmPassword) {
         setMessage({ type: 'error', text: 'Las contraseñas no coinciden' });
+        setLoading(false);
         return;
       }
 
       if (passwordData.newPassword.length < 6) {
         setMessage({ type: 'error', text: 'La contraseña debe tener al menos 6 caracteres' });
+        setLoading(false);
         return;
       }
 
-      await changePassword(passwordData.currentPassword, passwordData.newPassword);
-      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      setMessage({ type: 'success', text: 'Contraseña cambiada exitosamente' });
+      // Usar el endpoint de usuarios del dashboard con la contraseña
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:3000/api/dashboard/usuarios/${user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          nombre: user.nombre,
+          apellido: user.apellido,
+          email: user.email,
+          telefono: user.telefono,
+          password: passwordData.newPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        setMessage({ type: 'success', text: 'Contraseña cambiada exitosamente' });
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Error al cambiar la contraseña' });
+      }
     } catch (error) {
       setMessage({ type: 'error', text: 'Error al cambiar la contraseña' });
     } finally {
@@ -114,7 +169,7 @@ const DashboardPerfil = () => {
           Gestiona tu información personal y configuración de cuenta
         </Typography>
 
-        {message.text && (
+        {message.text && message.type && (
           <Alert severity={message.type} sx={{ mb: 3 }}>
             {message.text}
           </Alert>

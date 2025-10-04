@@ -5,7 +5,6 @@ const authMiddleware = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    console.error('Token faltante o mal formado');
     return res.status(401).json({ error: 'No autorizado, token faltante' });
   }
   
@@ -45,7 +44,6 @@ const authMiddleware = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error('Token inválido:', error);
     return res.status(401).json({ error: 'Token inválido' });
   }
 };
@@ -78,7 +76,6 @@ const checkPermission = (requiredPermission) => {
 
       next();
     } catch (error) {
-      console.error('Error verificando permisos:', error);
       return res.status(500).json({ error: 'Error verificando permisos' });
     }
   };
@@ -126,7 +123,6 @@ const isAdmin = (req, res, next) => {
     next();
     
   } catch (error) {
-    console.error('❌ Error en middleware isAdmin:', error);
     res.status(500).json({ error: 'Error en verificación de permisos' });
   }
 };

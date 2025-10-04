@@ -172,7 +172,7 @@ const DashboardCategorias = () => {
     try {
       await crudOperations.remove(item.id);
     } catch (error) {
-      console.error('Error deleting categoría:', error);
+      // Error handled by UI
     }
   };
 
@@ -187,7 +187,7 @@ const DashboardCategorias = () => {
       setSelectedItem(null);
       return true;
     } catch (error) {
-      console.error('Error saving categoría:', error);
+      // Error handled by UI
       return false;
     }
   };
