@@ -16,6 +16,8 @@ import {
   Button,
   Stack,
   CircularProgress,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -26,6 +28,7 @@ import {
   Schedule as ScheduleIcon,
   Add as AddIcon,
   Visibility as ViewIcon,
+  Refresh as RefreshIcon,
 } from '@mui/icons-material';
 
 // Importar componentes personalizados y servicios
@@ -34,6 +37,10 @@ import { dashboardService } from '../services';
 import { useApi } from '../hooks';
 
 const DashboardHome = () => {
+  // Estado para mostrar última actualización
+  const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   // Usar hooks personalizados para obtener datos
   const {
     data: stats,
@@ -51,6 +58,27 @@ const DashboardHome = () => {
 
   const loading = statsLoading || reservasLoading;
   const error = statsError || reservasError;
+
+  // ⚡ ACTUALIZACIÓN AUTOMÁTICA CADA 30 SEGUNDOS
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      refetchStats();
+      refetchReservas();
+      setLastUpdate(new Date());
+    }, 30000); // 30 segundos
+
+    // Cleanup: limpiar intervalo al desmontar componente
+    return () => clearInterval(intervalId);
+  }, [refetchStats, refetchReservas]);
+
+  // Función para actualizar manualmente
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    await refetchStats();
+    await refetchReservas();
+    setLastUpdate(new Date());
+    setIsRefreshing(false);
+  };
 
   const getStatusColor = (estado) => {
     switch (estado?.toLowerCase()) {
@@ -76,13 +104,43 @@ const DashboardHome = () => {
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 600 }}>
-          Panel de Control
-        </Typography>
-        <Typography variant="subtitle1" color="text.secondary">
-          Bienvenido al dashboard de Lavado Vapor Bogotá
-        </Typography>
+      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box>
+          <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 600 }}>
+            Panel de Control
+          </Typography>
+          <Typography variant="subtitle1" color="text.secondary">
+            Bienvenido al dashboard de Lavado Vapor Bogotá
+          </Typography>
+        </Box>
+        
+        {/* Indicador de última actualización y botón refrescar */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ textAlign: 'right' }}>
+            <Typography variant="caption" color="text.secondary" display="block">
+              Actualización automática cada 30s
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Última actualización: {lastUpdate.toLocaleTimeString('es-ES')}
+            </Typography>
+          </Box>
+          <Tooltip title="Actualizar ahora">
+            <IconButton 
+              color="primary" 
+              onClick={handleManualRefresh}
+              disabled={isRefreshing}
+              sx={{
+                animation: isRefreshing ? 'spin 1s linear infinite' : 'none',
+                '@keyframes spin': {
+                  '0%': { transform: 'rotate(0deg)' },
+                  '100%': { transform: 'rotate(360deg)' },
+                },
+              }}
+            >
+              <RefreshIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
 
       {error && (
