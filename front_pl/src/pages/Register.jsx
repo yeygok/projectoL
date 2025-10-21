@@ -1,141 +1,29 @@
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
 import {
   Box,
   Paper,
   Typography,
-  TextField,
-  Alert,
   Container,
   Avatar,
-  InputAdornment,
-  IconButton,
-  Grid,
+  Fade,
+  Zoom,
 } from '@mui/material';
-import {
-  Lock as LockIcon,
-  Email as EmailIcon,
-  Person as PersonIcon,
-  Phone as PhoneIcon,
-  Visibility,
-  VisibilityOff,
-  CarRepair as ServiceIcon,
-} from '@mui/icons-material';
+import { CarRepair as ServiceIcon } from '@mui/icons-material';
+import { useRegister, RegisterForm } from '../components/register';
 
-import { Button } from '../components/common';
-import { useAuth } from '../context/AuthContext';
-
+/**
+ * Componente principal de la página de registro de usuario.
+ * Utiliza componentes modulares para mantener el código limpio y mantenible.
+ * @returns {JSX.Element} Página de registro
+ */
 const Register = () => {
-  const [formData, setFormData] = useState({
-    nombre: '',
-    apellido: '',
-    email: '',
-    telefono: '',
-    password: '',
-    confirmPassword: ''
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { register } = useAuth();
-
-  const handleInputChange = (field) => (event) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: event.target.value
-    }));
-    if (error) setError('');
-  };
-
-  const validateForm = () => {
-    if (!formData.nombre || !formData.apellido || !formData.email || !formData.telefono || !formData.password) {
-      setError('Todos los campos son requeridos');
-      return false;
-    }
-
-    if (formData.password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
-      return false;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden');
-      return false;
-    }
-
-    // Validar formato de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setError('Email inválido');
-      return false;
-    }
-
-    // Validar teléfono (solo números, 10 dígitos)
-    const phoneRegex = /^\d{10}$/;
-    if (!phoneRegex.test(formData.telefono.replace(/\s/g, ''))) {
-      setError('Teléfono inválido (debe ser 10 dígitos)');
-      return false;
-    }
-
-    return true;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    
-    if (!validateForm()) {
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      // Registrar el usuario como CLIENTE (rol_id = 2)
-      const registerData = {
-        nombre: formData.nombre,
-        apellido: formData.apellido,
-        email: formData.email,
-        telefono: formData.telefono,
-        password: formData.password,
-        rol_id: 2 // Cliente
-      };
-
-      const result = await register(registerData);
-
-      if (result.success) {
-        // Registro y login exitoso - redirigir según el contexto
-        const from = location.state?.from;
-        const categoriaPreseleccionada = location.state?.categoriaPreseleccionada;
-        
-        if (from === '/cliente/reservar' && categoriaPreseleccionada) {
-          // Si venía de un intento de reserva, llevarlo directamente allí
-          navigate('/cliente/reservar', { 
-            state: { categoriaPreseleccionada },
-            replace: true 
-          });
-        } else {
-          // ✅ Ir al HOME para que vea la landing page y pueda reservar desde ahí
-          navigate('/', { 
-            state: { 
-              welcomeMessage: `¡Bienvenido ${formData.nombre}! Tu cuenta ha sido creada exitosamente.` 
-            },
-            replace: true 
-          });
-        }
-      } else {
-        setError(result.message || 'Error al registrar usuario');
-      }
-    } catch (err) {
-      setError('Error al registrar usuario. Por favor intenta nuevamente.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    showForm,
+    handleSubmit,
+    handleCancel,
+    goToLogin,
+    ...formProps
+  } = useRegister();
 
   return (
     <Box
@@ -144,221 +32,85 @@ const Register = () => {
         display: 'flex',
         alignItems: 'center',
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        p: 2
+        p: 2,
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Ccircle cx="30" cy="30" r="4"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+          zIndex: 0,
+        }
       }}
     >
-      <Container maxWidth="md">
-        <Paper
-          elevation={10}
-          sx={{
-            p: 4,
-            borderRadius: 3,
-            textAlign: 'center'
-          }}
-        >
-          {/* Logo/Header */}
-          <Avatar
+      <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+        <Zoom in={showForm} timeout={600}>
+          <Paper
+            elevation={12}
             sx={{
-              mx: 'auto',
-              mb: 2,
-              bgcolor: 'primary.main',
-              width: 80,
-              height: 80,
-              fontSize: '2rem'
+              p: { xs: 3, md: 5 },
+              borderRadius: 4,
+              textAlign: 'center',
+              background: 'rgba(255, 255, 255, 0.98)',
+              backdropFilter: 'blur(20px)',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
             }}
           >
-            <ServiceIcon fontSize="large" />
-          </Avatar>
-          
-          <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 600 }}>
-            Crear Cuenta
-          </Typography>
-          
-          <Typography variant="subtitle1" color="text.secondary" gutterBottom sx={{ mb: 4 }}>
-            Regístrate para agendar tus servicios
-          </Typography>
-
-          {/* Form */}
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-            <Grid container spacing={2}>
-              {/* Nombre */}
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Nombre"
-                  value={formData.nombre}
-                  onChange={handleInputChange('nombre')}
-                  variant="outlined"
-                  required
-                  placeholder="Juan"
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PersonIcon color="action" />
-                      </InputAdornment>
-                    )
+            {/* Logo/Header */}
+            <Fade in={showForm} timeout={800}>
+              <Box>
+                <Avatar
+                  sx={{
+                    mx: 'auto',
+                    mb: 3,
+                    bgcolor: 'primary.main',
+                    width: 90,
+                    height: 90,
+                    fontSize: '2.5rem',
+                    boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)',
                   }}
-                />
-              </Grid>
+                >
+                  <ServiceIcon fontSize="large" />
+                </Avatar>
 
-              {/* Apellido */}
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Apellido"
-                  value={formData.apellido}
-                  onChange={handleInputChange('apellido')}
-                  variant="outlined"
-                  required
-                  placeholder="Pérez"
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PersonIcon color="action" />
-                      </InputAdornment>
-                    )
+                <Typography
+                  variant="h3"
+                  component="h1"
+                  gutterBottom
+                  sx={{
+                    fontWeight: 700,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    mb: 2,
                   }}
-                />
-              </Grid>
+                >
+                  Crear Cuenta
+                </Typography>
 
-              {/* Email */}
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleInputChange('email')}
-                  variant="outlined"
-                  required
-                  autoComplete="username"
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <EmailIcon color="action" />
-                      </InputAdornment>
-                    )
-                  }}
-                />
-              </Grid>
+                <Typography
+                  variant="h6"
+                  color="text.secondary"
+                  gutterBottom
+                  sx={{ mb: 4, fontWeight: 400 }}
+                >
+                  Únete a nuestra comunidad y agenda tus servicios fácilmente
+                </Typography>
+              </Box>
+            </Fade>
 
-              {/* Teléfono */}
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Teléfono"
-                  value={formData.telefono}
-                  onChange={handleInputChange('telefono')}
-                  variant="outlined"
-                  required
-                  placeholder="3001234567"
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <PhoneIcon color="action" />
-                      </InputAdornment>
-                    )
-                  }}
-                />
-              </Grid>
-
-              {/* Contraseña */}
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Contraseña"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={handleInputChange('password')}
-                  variant="outlined"
-                  required
-                  autoComplete="new-password"
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LockIcon color="action" />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge="end"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }}
-                />
-              </Grid>
-
-              {/* Confirmar Contraseña */}
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="Confirmar Contraseña"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange('confirmPassword')}
-                  variant="outlined"
-                  required
-                  autoComplete="new-password"
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LockIcon color="action" />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          edge="end"
-                        >
-                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    )
-                  }}
-                />
-              </Grid>
-            </Grid>
-
-            {error && (
-              <Alert severity="error" sx={{ mt: 3 }}>
-                {error}
-              </Alert>
-            )}
-
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
-              disabled={loading}
-              sx={{ 
-                mt: 3,
-                py: 1.5,
-                fontSize: '1.1rem',
-                textTransform: 'none'
-              }}
-            >
-              {loading ? 'Registrando...' : 'Crear Cuenta'}
-            </Button>
-
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 3 }}>
-              ¿Ya tienes cuenta?{' '}
-              <Button
-                variant="text"
-                onClick={() => navigate('/login', { state: location.state })}
-                sx={{ textTransform: 'none', p: 0 }}
-              >
-                Inicia sesión aquí
-              </Button>
-            </Typography>
-          </Box>
-        </Paper>
+            {/* Formulario */}
+            <RegisterForm
+              {...formProps}
+              handleSubmit={handleSubmit}
+              handleCancel={handleCancel}
+              goToLogin={goToLogin}
+            />
+          </Paper>
+        </Zoom>
       </Container>
     </Box>
   );
