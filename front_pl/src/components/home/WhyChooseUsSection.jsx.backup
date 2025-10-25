@@ -119,16 +119,16 @@ const styles = {
     left: 0,
     right: 0,
     height: '120px',
-    background: `linear-gradient(to ${position === 'top' ? 'bottom' : 'top'}, rgba(255,255,255,0.9), transparent)`,
+    background: \`linear-gradient(to \${position === 'top' ? 'bottom' : 'top'}, rgba(255,255,255,0.9), transparent)\`,
   }),
   floatingElement: (size, position, animationDuration) => ({
     position: 'absolute',
     ...position,
-    width: `${size}px`,
-    height: `${size}px`,
+    width: \`\${size}px\`,
+    height: \`\${size}px\`,
     borderRadius: '50%',
     background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))',
-    animation: `float ${animationDuration}s ease-in-out infinite`,
+    animation: \`float \${animationDuration}s ease-in-out infinite\`,
   }),
 };
 
@@ -152,7 +152,7 @@ const VentajaCard = memo(({ ventaja, index }) => {
             borderRadius: 4,
             transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
             cursor: 'pointer',
-            border: ventaja.popular ? `2px solid ${ventaja.color}40` : '1px solid rgba(102, 126, 234, 0.1)',
+            border: ventaja.popular ? \`2px solid \${ventaja.color}40\` : '1px solid rgba(102, 126, 234, 0.1)',
             position: 'relative',
             overflow: 'hidden',
             '&::before': {
@@ -162,20 +162,20 @@ const VentajaCard = memo(({ ventaja, index }) => {
               left: 0,
               right: 0,
               height: '4px',
-              background: `linear-gradient(90deg, ${ventaja.color}, ${ventaja.color}dd)`,
+              background: \`linear-gradient(90deg, \${ventaja.color}, \${ventaja.color}dd)\`,
               transform: 'scaleX(0)',
               transition: 'transform 0.3s ease',
             },
             '&:hover': {
               transform: 'translateY(-12px) scale(1.02)',
-              boxShadow: `0 25px 50px rgba(0,0,0,0.15), 0 0 30px ${ventaja.color}30`,
+              boxShadow: \`0 25px 50px rgba(0,0,0,0.15), 0 0 30px \${ventaja.color}30\`,
               borderColor: ventaja.color,
               '&::before': {
                 transform: 'scaleX(1)',
               },
               '& .advantage-icon': {
                 transform: 'scale(1.1) rotate(5deg)',
-                boxShadow: `0 10px 30px ${ventaja.color}40`,
+                boxShadow: \`0 10px 30px \${ventaja.color}40\`,
               },
               '& .advantage-title': {
                 color: ventaja.color,
@@ -222,12 +222,12 @@ const VentajaCard = memo(({ ventaja, index }) => {
                 height: { xs: 70, md: 80 },
                 mx: 'auto',
                 mb: 3,
-                bgcolor: `${ventaja.color}15`,
+                bgcolor: \`\${ventaja.color}15\`,
                 color: ventaja.color,
                 fontSize: { xs: 35, md: 40 },
-                border: `2px solid ${ventaja.color}30`,
+                border: \`2px solid \${ventaja.color}30\`,
                 transition: 'all 0.3s ease',
-                boxShadow: `0 4px 15px ${ventaja.color}20`,
+                boxShadow: \`0 4px 15px \${ventaja.color}20\`,
               }}
             >
               <IconComponent />
@@ -294,8 +294,8 @@ const PromesaCard = memo(({ promesa }) => {
     >
       <Avatar
         sx={{
-          bgcolor: `${promesa.color}.light`,
-          color: `${promesa.color}.main`,
+          bgcolor: \`\${promesa.color}.light\`,
+          color: \`\${promesa.color}.main\`,
           width: { xs: 45, md: 50 },
           height: { xs: 45, md: 50 },
           flexShrink: 0,
@@ -468,12 +468,12 @@ export const WhyChooseUsSection = memo(() => {
       </Container>
 
       {/* Animación CSS */}
-      <style>{`
+      <style>{\`
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-20px); }
         }
-      `}</style>
+      \`}</style>
     </Box>
   );
 });
