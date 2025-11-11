@@ -1,0 +1,160 @@
+TABLE_NAME	COLUMN_NAME	DATA_TYPE	COLUMN_KEY
+Calificaciones	id	int	PRI
+Calificaciones	reserva_id	int	MUL
+Calificaciones	cliente_id	int	MUL
+Calificaciones	tecnico_id	int	MUL
+Calificaciones	puntuacion_servicio	int	
+Calificaciones	puntuacion_tecnico	int	
+Calificaciones	puntuacion_puntualidad	int	
+Calificaciones	comentario	text	
+Calificaciones	created_at	datetime	
+CategoriasServicios	id	int	PRI
+CategoriasServicios	nombre	varchar	UNI
+CategoriasServicios	descripcion	text	
+CategoriasServicios	icono	varchar	
+CategoriasServicios	activa	tinyint	
+CategoriasServicios	orden	int	
+CategoriasServicios	created_at	datetime	
+CategoriasServicios	updated_at	datetime	
+EstadosReserva	id	int	PRI
+EstadosReserva	estado	varchar	UNI
+EstadosReserva	descripcion	text	
+EstadosReserva	color	varchar	
+EstadosReserva	created_at	datetime	
+EstadosReserva	updated_at	datetime	
+EstadosSoporte	id	int	PRI
+EstadosSoporte	estado	varchar	UNI
+EstadosSoporte	descripcion	text	
+EstadosSoporte	color	varchar	
+EstadosSoporte	created_at	datetime	
+HistorialServicios	id	int	PRI
+HistorialServicios	reserva_id	int	MUL
+HistorialServicios	fecha_inicio	datetime	
+HistorialServicios	fecha_fin	datetime	
+HistorialServicios	observaciones_inicio	text	
+HistorialServicios	observaciones_fin	text	
+HistorialServicios	productos_utilizados	text	
+HistorialServicios	fotos_antes	text	
+HistorialServicios	fotos_despues	text	
+HistorialServicios	created_at	datetime	
+HistorialServicios	updated_at	datetime	
+Notificaciones	id	int	PRI
+Notificaciones	usuario_id	int	MUL
+Notificaciones	titulo	varchar	
+Notificaciones	mensaje	text	
+Notificaciones	tipo	enum	
+Notificaciones	leido	float	
+Notificaciones	fecha_envio	datetime	
+Notificaciones	created_at	datetime	
+Notificaciones	updated_at	datetime	
+OrdenesCompra	id	int	PRI
+OrdenesCompra	reserva_id	int	MUL
+OrdenesCompra	numero_orden	varchar	UNI
+OrdenesCompra	subtotal	decimal	
+OrdenesCompra	impuestos	decimal	
+OrdenesCompra	descuentos	decimal	
+OrdenesCompra	total	decimal	
+OrdenesCompra	metodo_pago	enum	
+OrdenesCompra	estado_pago	enum	
+OrdenesCompra	fecha_factura	datetime	
+OrdenesCompra	created_at	datetime	
+OrdenesCompra	updated_at	datetime	
+Permisos	id	int	PRI
+Permisos	nombre	varchar	UNI
+Permisos	descripcion	text	
+Permisos	modulo	varchar	
+Permisos	created_at	datetime	
+Permisos	updated_at	datetime	
+Reservas	id	int	PRI
+Reservas	cliente_id	int	MUL
+Reservas	tecnico_id	int	MUL
+Reservas	vehiculo_id	int	MUL
+Reservas	servicio_tipo_id	int	MUL
+Reservas	ubicacion_servicio_id	int	MUL
+Reservas	fecha_reserva	datetime	
+Reservas	fecha_servicio	datetime	MUL
+Reservas	precio_total	decimal	
+Reservas	estado_id	int	MUL
+Reservas	observaciones	text	
+Reservas	notas_tecnico	text	
+Reservas	created_at	datetime	
+Reservas	updated_at	datetime	
+Roles	id	int	PRI
+Roles	nombre	varchar	UNI
+Roles	descripcion	text	
+Roles	created_at	datetime	
+Roles	updated_at	datetime	
+RolPermisos	rol_id	int	PRI
+RolPermisos	permiso_id	int	PRI
+Servicios	id	int	PRI
+Servicios	categoria_id	int	MUL
+Servicios	nombre	varchar	
+Servicios	descripcion	text	
+Servicios	precio_base	decimal	
+Servicios	duracion_estimada	int	
+Servicios	activo	tinyint	
+Servicios	created_at	datetime	
+Servicios	updated_at	datetime	
+ServiciosTipos	id	int	PRI
+ServiciosTipos	servicio_id	int	MUL
+ServiciosTipos	tipo_id	int	MUL
+ServiciosTipos	precio_final	decimal	
+ServiciosTipos	descripcion_adicional	text	
+ServiciosTipos	activo	tinyint	
+Soporte	id	int	PRI
+Soporte	usuario_id	int	MUL
+Soporte	reserva_id	int	MUL
+Soporte	titulo	varchar	
+Soporte	mensaje	text	
+Soporte	prioridad	enum	
+Soporte	estado_id	int	MUL
+Soporte	fecha_creacion	datetime	
+Soporte	fecha_resolucion	datetime	
+Soporte	resuelto_por	int	MUL
+Soporte	created_at	datetime	
+Soporte	updated_at	datetime	
+TiposServicio	id	int	PRI
+TiposServicio	nombre	varchar	UNI
+TiposServicio	descripcion	text	
+TiposServicio	multiplicador_precio	decimal	
+TiposServicio	color	varchar	
+TiposServicio	created_at	datetime	
+TiposServicio	updated_at	datetime	
+Tokens	id	int	PRI
+Tokens	usuario_id	int	MUL
+Tokens	token	text	
+Tokens	tipo	enum	
+Tokens	expiracion	datetime	
+Tokens	activo	tinyint	
+Tokens	created_at	datetime	
+Ubicaciones	id	int	PRI
+Ubicaciones	direccion	text	
+Ubicaciones	barrio	varchar	
+Ubicaciones	localidad	varchar	
+Ubicaciones	latitud	decimal	
+Ubicaciones	longitud	decimal	
+Ubicaciones	zona	enum	
+Ubicaciones	activa	tinyint	
+Ubicaciones	created_at	datetime	
+Ubicaciones	updated_at	datetime	
+Usuarios	id	int	PRI
+Usuarios	nombre	varchar	
+Usuarios	apellido	varchar	
+Usuarios	email	varchar	UNI
+Usuarios	telefono	varchar	
+Usuarios	ubicacion_id	int	MUL
+Usuarios	rol_id	int	MUL
+Usuarios	password	varchar	
+Usuarios	activo	tinyint	
+Usuarios	fecha_ultimo_acceso	datetime	
+Usuarios	created_at	datetime	
+Usuarios	updated_at	datetime	
+Vehiculos	id	int	PRI
+Vehiculos	modelo	varchar	
+Vehiculos	placa	varchar	UNI
+Vehiculos	capacidad_tanque	decimal	
+Vehiculos	ubicacion_actual_id	int	MUL
+Vehiculos	activo	tinyint	
+Vehiculos	en_servicio	tinyint	
+Vehiculos	created_at	datetime	
+Vehiculos	updated_at	datetime	

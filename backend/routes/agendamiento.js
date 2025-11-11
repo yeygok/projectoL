@@ -3,24 +3,24 @@ const router = express.Router();
 const agendamientoController = require('../controllers/agendamientoController');
 const { authMiddleware } = require('../middlewares/authMiddleware');
 
-// Aplicar middleware de autenticación a todas las rutas
-router.use(authMiddleware);
+// Rutas PÚBLICAS (sin autenticación)
+router.get('/disponibilidad', agendamientoController.checkDisponibilidad);
 
+// Rutas PRIVADAS (requieren autenticación)
 // Rutas de testing
-router.get('/test-email', agendamientoController.testEmail);
+router.get('/test-email', authMiddleware, agendamientoController.testEmail);
 
 // Rutas específicas primero (sin parámetros)
-router.get('/disponibilidad', agendamientoController.checkDisponibilidad);
-router.get('/cliente/:clienteId', agendamientoController.getReservasByCliente);
+router.get('/cliente/:clienteId', authMiddleware, agendamientoController.getReservasByCliente);
 
 // Rutas con parámetros después
-router.get('/:id/detalle', agendamientoController.getAgendamientoDetalle);
-router.get('/:id', agendamientoController.getAgendamientoById);
+router.get('/:id/detalle', authMiddleware, agendamientoController.getAgendamientoDetalle);
+router.get('/:id', authMiddleware, agendamientoController.getAgendamientoById);
 
 // Rutas CRUD principales
-router.get('/', agendamientoController.getAllAgendamientos);
-router.post('/', agendamientoController.createAgendamiento);
-router.put('/:id', agendamientoController.updateAgendamiento);
-router.delete('/:id', agendamientoController.deleteAgendamiento);
+router.get('/', authMiddleware, agendamientoController.getAllAgendamientos);
+router.post('/', authMiddleware, agendamientoController.createAgendamiento);
+router.put('/:id', authMiddleware, agendamientoController.updateAgendamiento);
+router.delete('/:id', authMiddleware, agendamientoController.deleteAgendamiento);
 
 module.exports = router;

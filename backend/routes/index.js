@@ -29,6 +29,12 @@ const tipoServicioRoutes = require('./tipo_servicio');
 const categoriaRoutes = require('./categoria');
 const estadoReservaRoutes = require('./estado_reserva');
 
+// GRUPO 1 - Nuevas rutas
+const calificacionesRoutes = require('./calificaciones');
+const historialServiciosRoutes = require('./historial_servicios');
+const notificacionesRoutes = require('./notificaciones');
+const soporteRoutes = require('./soporte');
+
 // Configurar rutas
 router.use('/auth', authRoutes);
 router.use('/services', serviceRoutes);
@@ -43,5 +49,11 @@ router.use('/tipos-servicio', tipoServicioRoutes);
 router.use('/categorias', categoriaRoutes);
 router.use('/categorias-servicio', categoriaRoutes); // Alias para compatibilidad con frontend
 router.use('/estados-reserva', estadoReservaRoutes);
+
+// GRUPO 1 - Configurar nuevas rutas
+router.use('/calificaciones', calificacionesRoutes);
+router.use('/historial-servicios', historialServiciosRoutes);
+router.use('/notificaciones', notificacionesRoutes);
+router.use('/soporte', soporteRoutes);
 
 module.exports = router;

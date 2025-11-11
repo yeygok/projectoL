@@ -118,7 +118,20 @@ const updateMyProfile = async (req, res) => {
 
 const getAllPerfiles = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM perfil');
+    const [rows] = await pool.query(`
+      SELECT 
+        u.id, 
+        u.nombre, 
+        u.apellido, 
+        u.email, 
+        u.telefono, 
+        u.activo,
+        u.created_at,
+        u.updated_at,
+        r.nombre as rol_nombre
+      FROM Usuarios u
+      LEFT JOIN Roles r ON u.rol_id = r.id
+    `);
     res.json(rows);
   } catch (error) {
     console.error('Error en getAllPerfiles:', error.message);
@@ -128,7 +141,21 @@ const getAllPerfiles = async (req, res) => {
 
 const getPerfilById = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM perfil WHERE id = ?', [req.params.id]);
+    const [rows] = await pool.query(`
+      SELECT 
+        u.id, 
+        u.nombre, 
+        u.apellido, 
+        u.email, 
+        u.telefono, 
+        u.activo,
+        u.created_at,
+        u.updated_at,
+        r.nombre as rol_nombre
+      FROM Usuarios u
+      LEFT JOIN Roles r ON u.rol_id = r.id
+      WHERE u.id = ?
+    `, [req.params.id]);
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Perfil no encontrado' });
     }
