@@ -35,6 +35,11 @@ const historialServiciosRoutes = require('./historial_servicios');
 const notificacionesRoutes = require('./notificaciones');
 const soporteRoutes = require('./soporte');
 
+// GRUPO 2 - Nuevas rutas
+const ordenesCompraRoutes = require('./ordenes_compra');
+const estadosSoporteRoutes = require('./estados_soporte');
+const tokensRoutes = require('./tokens');
+
 // Configurar rutas
 router.use('/auth', authRoutes);
 router.use('/services', serviceRoutes);
@@ -55,5 +60,10 @@ router.use('/calificaciones', calificacionesRoutes);
 router.use('/historial-servicios', historialServiciosRoutes);
 router.use('/notificaciones', notificacionesRoutes);
 router.use('/soporte', soporteRoutes);
+
+// GRUPO 2 - Configurar nuevas rutas
+router.use('/ordenes-compra', ordenesCompraRoutes);
+router.use('/estados-soporte', estadosSoporteRoutes);
+router.use('/tokens', tokensRoutes);
 
 module.exports = router;

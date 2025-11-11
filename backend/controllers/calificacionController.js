@@ -141,6 +141,8 @@ const createCalificacion = async (req, res) => {
   }
 
   try {
+    const es_admin = req.user.rol_nombre === 'admin';
+
     // Verificar que la reserva existe y obtener datos
     const [reserva] = await pool.query(
       'SELECT cliente_id, tecnico_id, estado_id FROM Reservas WHERE id = ?',
@@ -151,8 +153,8 @@ const createCalificacion = async (req, res) => {
       return res.status(404).json({ error: 'Reserva no encontrada' });
     }
 
-    // Verificar que el usuario autenticado es el cliente de la reserva
-    if (reserva[0].cliente_id !== req.user.id) {
+    // Verificar permisos: debe ser el cliente de la reserva O ser admin
+    if (!es_admin && reserva[0].cliente_id !== req.user.id) {
       return res.status(403).json({
         error: 'No tienes permiso para calificar esta reserva'
       });

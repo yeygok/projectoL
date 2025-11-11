@@ -270,5 +270,211 @@ export const estadoReservaService = {
   }
 };
 
+// ============================================
+// SERVICIOS GRUPO 1
+// ============================================
+
+// Servicio de Calificaciones
+export const calificacionService = {
+  getAll: async (skipAuth = true) => {
+    const response = await apiService.get('/api/calificaciones', {}, skipAuth);
+    return Array.isArray(response) ? response : (response.data || response);
+  },
+  
+  getById: async (id, skipAuth = true) => {
+    const response = await apiService.get(`/api/calificaciones/${id}`, {}, skipAuth);
+    return response.data || response;
+  },
+  
+  getByServicio: async (servicioId, skipAuth = true) => {
+    const response = await apiService.get(`/api/calificaciones/servicio/${servicioId}`, {}, skipAuth);
+    return Array.isArray(response) ? response : (response.data || response);
+  },
+  
+  getByTecnico: async (tecnicoId, skipAuth = true) => {
+    const response = await apiService.get(`/api/calificaciones/tecnico/${tecnicoId}`, {}, skipAuth);
+    return Array.isArray(response) ? response : (response.data || response);
+  },
+  
+  create: async (data) => {
+    const response = await apiService.post('/api/calificaciones', data);
+    return response.calificacion || response.data || response;
+  },
+  
+  update: async (id, data) => {
+    const response = await apiService.put(`/api/calificaciones/${id}`, data);
+    return response.data || response;
+  },
+  
+  delete: async (id) => {
+    const response = await apiService.delete(`/api/calificaciones/${id}`);
+    return response.data || response;
+  }
+};
+
+// Servicio de Historial de Servicios
+export const historialServiciosService = {
+  getAll: async () => {
+    const response = await apiService.get('/api/historial-servicios');
+    return Array.isArray(response) ? response : (response.data || response);
+  },
+  
+  getById: async (id) => {
+    const response = await apiService.get(`/api/historial-servicios/${id}`);
+    return response.data || response;
+  },
+  
+  getByReserva: async (reservaId) => {
+    const response = await apiService.get(`/api/historial-servicios/reserva/${reservaId}`);
+    return Array.isArray(response) ? response : (response.data || response);
+  },
+  
+  create: async (data) => {
+    const response = await apiService.post('/api/historial-servicios', data);
+    return response.historial || response.data || response;
+  },
+  
+  update: async (id, data) => {
+    const response = await apiService.put(`/api/historial-servicios/${id}`, data);
+    return response.data || response;
+  },
+  
+  delete: async (id) => {
+    const response = await apiService.delete(`/api/historial-servicios/${id}`);
+    return response.data || response;
+  }
+};
+
+// Servicio de Notificaciones
+export const notificacionService = {
+  getMisNotificaciones: async () => {
+    const response = await apiService.get('/api/notificaciones/mis-notificaciones');
+    return Array.isArray(response) ? response : (response.data || response);
+  },
+  
+  getNoLeidas: async () => {
+    const response = await apiService.get('/api/notificaciones/no-leidas');
+    return Array.isArray(response) ? response : (response.data || response);
+  },
+  
+  marcarLeida: async (id) => {
+    const response = await apiService.put(`/api/notificaciones/${id}/leer`);
+    return response.data || response;
+  },
+  
+  marcarTodasLeidas: async () => {
+    const response = await apiService.put('/api/notificaciones/marcar-todas-leidas');
+    return response.data || response;
+  },
+  
+  create: async (data) => {
+    const response = await apiService.post('/api/notificaciones', data);
+    return response.notificacion || response.data || response;
+  },
+  
+  delete: async (id) => {
+    const response = await apiService.delete(`/api/notificaciones/${id}`);
+    return response.data || response;
+  }
+};
+
+// Servicio de Soporte
+export const soporteService = {
+  getAll: async () => {
+    const response = await apiService.get('/api/soporte');
+    return Array.isArray(response) ? response : (response.data || response);
+  },
+  
+  getById: async (id) => {
+    const response = await apiService.get(`/api/soporte/${id}`);
+    return response.data || response;
+  },
+  
+  getMisTickets: async () => {
+    const response = await apiService.get('/api/soporte/mis-tickets');
+    return Array.isArray(response) ? response : (response.data || response);
+  },
+  
+  create: async (data) => {
+    const response = await apiService.post('/api/soporte', data);
+    return response.ticket || response.data || response;
+  },
+  
+  update: async (id, data) => {
+    const response = await apiService.put(`/api/soporte/${id}`, data);
+    return response.data || response;
+  },
+  
+  delete: async (id) => {
+    const response = await apiService.delete(`/api/soporte/${id}`);
+    return response.data || response;
+  }
+};
+
+// ============================================
+// SERVICIOS GRUPO 2
+// ============================================
+
+// Servicio de Órdenes de Compra
+export const ordenCompraService = {
+  getAll: async () => {
+    const response = await apiService.get('/api/ordenes-compra');
+    return Array.isArray(response) ? response : (response.data || response);
+  },
+  
+  getById: async (id) => {
+    const response = await apiService.get(`/api/ordenes-compra/${id}`);
+    return response.data || response;
+  },
+  
+  getByReserva: async (reservaId) => {
+    const response = await apiService.get(`/api/ordenes-compra/reserva/${reservaId}`);
+    return response.data || response;
+  },
+  
+  create: async (data) => {
+    const response = await apiService.post('/api/ordenes-compra', data);
+    return response.orden || response.data || response;
+  },
+  
+  update: async (id, data) => {
+    const response = await apiService.put(`/api/ordenes-compra/${id}`, data);
+    return response.data || response;
+  },
+  
+  delete: async (id) => {
+    const response = await apiService.delete(`/api/ordenes-compra/${id}`);
+    return response.data || response;
+  }
+};
+
+// Servicio de Estados de Soporte
+export const estadoSoporteService = {
+  getAll: async (skipAuth = true) => {
+    const response = await apiService.get('/api/estados-soporte', {}, skipAuth);
+    return Array.isArray(response) ? response : (response.data || response);
+  },
+  
+  getById: async (id, skipAuth = true) => {
+    const response = await apiService.get(`/api/estados-soporte/${id}`, {}, skipAuth);
+    return response.data || response;
+  },
+  
+  create: async (data) => {
+    const response = await apiService.post('/api/estados-soporte', data);
+    return response.estado || response.data || response;
+  },
+  
+  update: async (id, data) => {
+    const response = await apiService.put(`/api/estados-soporte/${id}`, data);
+    return response.data || response;
+  },
+  
+  delete: async (id) => {
+    const response = await apiService.delete(`/api/estados-soporte/${id}`);
+    return response.data || response;
+  }
+};
+
 export default apiService;
 export { ApiError };

@@ -246,6 +246,15 @@ export const usePagination = (data, itemsPerPage = 10) => {
   };
 };
 
+// Re-exportar hooks individuales
+export { useAsync } from './useAsync';
+export { useClickOutside } from './useClickOutside';
+export { useDebounce } from './useDebounce';
+export { useIntersectionObserver } from './useIntersectionObserver';
+export { useLocalStorage } from './useLocalStorage';
+export { useMediaQuery } from './useMediaQuery';
+export { useToggle } from './useToggle';
+
 export default {
   useApi,
   useCrud,

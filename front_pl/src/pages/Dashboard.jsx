@@ -39,6 +39,11 @@ import {
   Category as CategoryIcon,
   Style as StyleIcon,
   Timeline as TimelineIcon,
+  Star as StarIcon,
+  History as HistoryIcon,
+  SupportAgent as SupportIcon,
+  ShoppingCart as ShoppingIcon,
+  Label as LabelIconAlt,
 } from '@mui/icons-material';
 
 // Importar componentes del dashboard
@@ -56,6 +61,14 @@ import DashboardPerfil from './DashboardPerfil';
 import DashboardCategorias from './DashboardCategorias';
 import DashboardTiposServicio from './DashboardTiposServicio';
 import DashboardEstadosReserva from './DashboardEstadosReserva';
+// Páginas GRUPO 1 - Operaciones y Feedback
+import DashboardCalificaciones from './DashboardCalificaciones';
+import DashboardHistorialServicios from './DashboardHistorialServicios';
+import DashboardNotificaciones from './DashboardNotificaciones';
+import DashboardSoporte from './DashboardSoporte';
+// Páginas GRUPO 2 - Pagos y Estados
+import DashboardOrdenesCompra from './DashboardOrdenesCompra';
+import DashboardEstadosSoporte from './DashboardEstadosSoporte';
 
 const drawerWidth = 280;
 
@@ -142,10 +155,40 @@ const Dashboard = () => {
       description: 'Gestionar roles y permisos'
     },
     { 
-      path: '/dashboard/tipos', 
+      path: '/dashboard/calificaciones', 
       name: 'Calificaciones', 
-      icon: <SettingsIcon />,
-      description: 'Módulo en desarrollo - Sistema de calificaciones'
+      icon: <StarIcon />,
+      description: 'Gestionar calificaciones de servicios'
+    },
+    { 
+      path: '/dashboard/historial-servicios', 
+      name: 'Historial', 
+      icon: <HistoryIcon />,
+      description: 'Registro de acciones en reservas'
+    },
+    { 
+      path: '/dashboard/notificaciones', 
+      name: 'Notificaciones', 
+      icon: <NotificationsIcon />,
+      description: 'Gestionar notificaciones del sistema'
+    },
+    { 
+      path: '/dashboard/soporte', 
+      name: 'Soporte', 
+      icon: <SupportIcon />,
+      description: 'Tickets de soporte y problemas'
+    },
+    { 
+      path: '/dashboard/ordenes-compra', 
+      name: 'Órdenes de Compra', 
+      icon: <ShoppingIcon />,
+      description: 'Gestionar órdenes y pagos'
+    },
+    { 
+      path: '/dashboard/estados-soporte', 
+      name: 'Estados Soporte', 
+      icon: <LabelIconAlt />,
+      description: 'Estados de tickets de soporte'
     },
     { 
       path: '/dashboard/perfil', 
@@ -375,6 +418,14 @@ const Dashboard = () => {
           <Route path="categorias" element={<DashboardCategorias />} />
           <Route path="tipos-servicio" element={<DashboardTiposServicio />} />
           <Route path="estados-reserva" element={<DashboardEstadosReserva />} />
+          {/* Rutas GRUPO 1 - Operaciones y Feedback */}
+          <Route path="calificaciones" element={<DashboardCalificaciones />} />
+          <Route path="historial-servicios" element={<DashboardHistorialServicios />} />
+          <Route path="notificaciones" element={<DashboardNotificaciones />} />
+          <Route path="soporte" element={<DashboardSoporte />} />
+          {/* Rutas GRUPO 2 - Pagos y Estados */}
+          <Route path="ordenes-compra" element={<DashboardOrdenesCompra />} />
+          <Route path="estados-soporte" element={<DashboardEstadosSoporte />} />
         </Routes>
       </Box>
 
